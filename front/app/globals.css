@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap');
+@import 'tailwindcss';
+
+/* noinspection CssUnknownAtRule */
+@theme {
+	--color-primary:            hsl(205 45% 25%);
+	--color-primary-light:      hsl(205 45% 35%);
+	--color-primary-dark:       hsl(205 50% 18%);
+	--color-primary-foreground: hsl(0 0% 100%);
+	--color-accent:             hsl(25 80% 50%);
+	--color-accent-light:       hsl(25 85% 60%);
+	--color-accent-foreground:  hsl(0 0% 100%);
+	--color-secondary:          hsl(210 15% 92%);
+	--color-foreground:         hsl(210 50% 10%);
+	--color-muted-foreground:   hsl(210 15% 45%);
+	--color-background:         hsl(210 20% 98%);
+	--color-card:               hsl(0 0% 100%);
+	--color-border:             hsl(210 20% 88%);
+	--font-sans:    'Inter', system-ui, sans-serif;
+	--font-heading: 'Montserrat', sans-serif;
+	--font-display: 'Montserrat', sans-serif;
+	--shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+}
+
+@layer utilities {
+	.animate-float {
+		animation: float 6s ease-in-out infinite;
+	}
+	.animate-fade-up {
+		animation: fade-up 0.6s ease-out both;
+	}
+	.animation-delay-100 { animation-delay: 0.1s; }
+	.animation-delay-200 { animation-delay: 0.2s; }
+	.animation-delay-300 { animation-delay: 0.3s; }
+	.animation-delay-400 { animation-delay: 0.4s; }
+	.animation-delay-500 { animation-delay: 0.5s; }
+	.animation-delay-600 { animation-delay: 0.6s; }
+	.animation-delay-700 { animation-delay: 0.7s; }
+	.animation-delay-800 { animation-delay: 0.8s; }
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0px); }
+	50%       { transform: translateY(-20px); }
+}
+
+@keyframes fade-up {
+	from { opacity: 0; transform: translateY(24px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+:root {
+	/* component-level tokens (used with var() in style={{}}) */
+	--background: hsl(210 20% 98%);
+	--foreground: hsl(210 50% 10%);
+	--primary: hsl(205 45% 25%);
+	--primary-light: hsl(205 45% 35%);
+	--primary-dark: hsl(205 50% 18%);
+	--accent: hsl(25 80% 50%);
+	--accent-light: hsl(25 85% 60%);
+	--secondary: hsl(210 15% 92%);
+	--muted: hsl(210 15% 94%);
+	--muted-foreground: hsl(210 15% 45%);
+	--border: hsl(210 20% 88%);
+	--card: hsl(0 0% 100%);
+	--radius: 0.625rem;
+	--gradient-hero: linear-gradient(135deg, hsl(205 50% 18%) 0%, hsl(205 45% 30%) 100%);
+	--gradient-accent: linear-gradient(135deg, hsl(25 80% 50%) 0%, hsl(25 85% 60%) 100%);
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	background-color: var(--background);
+	color: var(--foreground);
+	font-family: 'Inter', system-ui, sans-serif;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+@layer utilities {
+	.section-padding {
+		padding-top: 5rem;
+		padding-bottom: 5rem;
+	}
+
+	@media (max-width: 768px) {
+		.section-padding {
+			padding-top: 3rem;
+			padding-bottom: 3rem;
+		}
+	}
+}
