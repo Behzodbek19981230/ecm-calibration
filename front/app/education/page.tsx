@@ -39,7 +39,7 @@ export default function EducationPage() {
             >
               {t.education.benefits.title}
             </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {benefits.map(b => {
                 const Icon = b.icon;
                 return (

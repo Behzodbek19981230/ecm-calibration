@@ -51,7 +51,7 @@ export default function HeroSection() {
 
 					{/* Title */}
 					<h1
-						className='animate-fade-up animation-delay-100 text-5xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-4 tracking-tight'
+						className='animate-fade-up animation-delay-100 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 tracking-tight'
 						style={{ fontFamily: 'var(--font-display)' }}
 					>
 						{t.hero.title}
@@ -59,29 +59,29 @@ export default function HeroSection() {
 
 					{/* Subtitle */}
 					<p
-						className='animate-fade-up animation-delay-200 text-2xl md:text-3xl text-primary-foreground/80 font-medium mb-6'
+						className='animate-fade-up animation-delay-200 text-lg sm:text-2xl md:text-3xl text-primary-foreground/80 font-medium mb-6'
 						style={{ fontFamily: 'var(--font-display)' }}
 					>
 						{t.hero.subtitle}
 					</p>
 
 					{/* Description */}
-					<p className='animate-fade-up animation-delay-300 text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto mb-10 leading-relaxed'>
+					<p className='animate-fade-up animation-delay-300 text-sm sm:text-base md:text-lg lg:text-xl text-primary-foreground/70 max-w-2xl mx-auto mb-10 leading-relaxed'>
 						{t.hero.description}
 					</p>
 
 					{/* CTA buttons */}
 					<div className='animate-fade-up animation-delay-400 flex flex-col sm:flex-row gap-4 justify-center'>
 						<Link
-							href='/contact'
-							className='inline-flex items-center justify-center gap-2 bg-accent text-accent-foreground hover:bg-accent-light shadow-lg hover:shadow-xl hover:-translate-y-1 font-bold h-14 rounded-xl px-10 text-lg transition-all duration-300 group'
+							href='/#ariza'
+							className='inline-flex items-center justify-center gap-2 bg-accent text-accent-foreground hover:bg-accent-light shadow-lg hover:shadow-xl hover:-translate-y-1 font-bold h-12 sm:h-14 rounded-xl px-7 sm:px-10 text-base sm:text-lg transition-all duration-300 group'
 						>
 							{t.hero.cta}
 							<ArrowRight className='w-5 h-5 transition-transform group-hover:translate-x-1' />
 						</Link>
 						<Link
 							href='/services'
-							className='inline-flex items-center justify-center gap-2 border-2 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm font-semibold h-14 rounded-xl px-10 text-lg transition-all duration-300'
+							className='inline-flex items-center justify-center gap-2 border-2 border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm font-semibold h-12 sm:h-14 rounded-xl px-7 sm:px-10 text-base sm:text-lg transition-all duration-300'
 						>
 							{t.hero.learnMore}
 						</Link>

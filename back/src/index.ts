@@ -8,6 +8,9 @@ import blogRoutes from './routes/blog';
 import telegramRoutes from './routes/telegram';
 import applicationRoutes from './routes/applications';
 import regionRoutes from './routes/regions';
+import userRoutes from './routes/users';
+import certificateRoutes from './routes/certificates';
+import statsRoutes from './routes/stats';
 import { initBot } from './bot';
 
 dotenv.config();
@@ -33,6 +36,9 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/regions', regionRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/stats', statsRoutes);
 
 initBot();
 

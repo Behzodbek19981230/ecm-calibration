@@ -25,7 +25,7 @@ export default function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/contact"
+              href="/#ariza"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white text-base transition-all hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5"
               style={{ background: 'var(--gradient-accent)' }}
             >

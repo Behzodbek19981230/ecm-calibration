@@ -90,15 +90,35 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
 
 // Admin: list all
 router.get('/', requireAuth, async (_req: AuthRequest, res: Response): Promise<void> => {
-  const applications = await prisma.application.findMany({ orderBy: { createdAt: 'desc' } });
+  const applications = await prisma.application.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: { assignedTo: { include: { roles: true } } },
+  });
   res.json(applications.map((a) => ({ ...a, devices: JSON.parse(a.devices) })));
 });
 
 // Admin: single application
 router.get('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
-  const app = await prisma.application.findUnique({ where: { id: Number(req.params.id) } });
+  const app = await prisma.application.findUnique({
+    where: { id: Number(req.params.id) },
+    include: { assignedTo: { include: { roles: true } }, certificate: true },
+  });
   if (!app) { res.status(404).json({ error: 'Not found' }); return; }
   res.json({ ...app, devices: JSON.parse(app.devices) });
+});
+
+// Admin: general update (status + assignedToId)
+router.patch('/:id', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { status, assignedToId } = req.body as { status?: string; assignedToId?: number | null };
+  const data: Record<string, unknown> = {};
+  if (status && (VALID_STATUSES as readonly string[]).includes(status)) data.status = status;
+  if (assignedToId !== undefined) data.assignedToId = assignedToId === null ? null : Number(assignedToId);
+  const application = await prisma.application.update({
+    where: { id: Number(req.params.id) },
+    data,
+    include: { assignedTo: { include: { roles: true } } },
+  });
+  res.json({ ...application, devices: JSON.parse(application.devices) });
 });
 
 // Admin: update status

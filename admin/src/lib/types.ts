@@ -10,6 +10,24 @@ export interface Region {
   districts: District[];
 }
 
+export type UserRole = 'admin' | 'manager' | 'buyro' | 'chief_laboratory';
+
+export interface UserRoleRecord {
+  id: number;
+  userId: number;
+  role: UserRole;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  fullName: string;
+  email: string;
+  isActive: boolean;
+  roles: UserRoleRecord[];
+  createdAt: string;
+}
+
 export interface Application {
   id: number;
   userType: 'individual' | 'legal';
@@ -23,7 +41,38 @@ export interface Application {
   devices: unknown[];
   filePath?: string;
   status: string;
+  assignedToId?: number;
+  assignedTo?: User;
+  certificate?: Certificate;
   createdAt: string;
+}
+
+export interface Certificate {
+  id: number;
+  certNumber: string;
+  applicationId: number;
+  application: Application;
+  issuedById: number;
+  issuedBy: User;
+  issuedAt: string;
+  expiresAt: string;
+  filePath?: string;
+  notes?: string;
+  status: 'active' | 'revoked';
+  createdAt: string;
+}
+
+export interface DashboardStats {
+  applications: {
+    total: number;
+    kutilmoqda: number;
+    jarayonda: number;
+    bajarildi: number;
+    bekor_qilindi: number;
+    perMonth: Array<{ month: string; count: number }>;
+  };
+  users: { total: number };
+  certificates: { total: number; active: number; revoked: number };
 }
 
 export interface Contact {

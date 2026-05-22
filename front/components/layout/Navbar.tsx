@@ -120,7 +120,7 @@ export default function Navbar() {
 							{company.phone}
 						</a>
 						<Link
-							href='/contact'
+							href='/#ariza'
 							className={`px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 hover:shadow-md ${
 								scrolled ? 'bg-gray-800 hover:bg-gray-700' : ''
 							}`}
@@ -169,7 +169,7 @@ export default function Navbar() {
 							{company.phone}
 						</a>
 						<Link
-							href='/contact'
+							href='/#ariza'
 							onClick={() => setMenuOpen(false)}
 							className='block mt-1 px-3 py-2.5 rounded-lg text-sm font-semibold text-white text-center bg-gray-800'
 						>

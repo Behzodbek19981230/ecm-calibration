@@ -7,11 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
+model User {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  password     String
+  fullName     String        @default("")
+  email        String        @default("")
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  roles        UserRole[]
+  certificates Certificate[] @relation("IssuedBy")
+  applications Application[] @relation("AssignedTo")
+}
+
+model UserRole {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  role   String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
 }
 
 model Contact {
@@ -37,19 +52,37 @@ model TelegramConnect {
 }
 
 model Application {
-  id             Int      @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   userType       String
   fullName       String?
   orgName        String?
   phone          String
   email          String
-  branchRequest  Boolean  @default(false)
-  notifyMethod   String   @default("email")
+  branchRequest  Boolean      @default(false)
+  notifyMethod   String       @default("email")
   telegramChatId String?
-  devices        String   @default("[]")
+  devices        String       @default("[]")
   filePath       String?
-  status         String   @default("kutilmoqda")
-  createdAt      DateTime @default(now())
+  status         String       @default("kutilmoqda")
+  assignedToId   Int?
+  assignedTo     User?        @relation("AssignedTo", fields: [assignedToId], references: [id])
+  certificate    Certificate?
+  createdAt      DateTime     @default(now())
+}
+
+model Certificate {
+  id            Int         @id @default(autoincrement())
+  certNumber    String      @unique
+  applicationId Int         @unique
+  application   Application @relation(fields: [applicationId], references: [id])
+  issuedById    Int
+  issuedBy      User        @relation("IssuedBy", fields: [issuedById], references: [id])
+  issuedAt      DateTime    @default(now())
+  expiresAt     DateTime
+  filePath      String?
+  notes         String?
+  status        String      @default("active")
+  createdAt     DateTime    @default(now())
 }
 
 model Region {

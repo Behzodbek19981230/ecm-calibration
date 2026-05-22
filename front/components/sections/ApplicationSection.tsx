@@ -217,7 +217,7 @@ export default function ApplicationSection() {
 	};
 
 	return (
-		<section className='py-16 sm:py-20' style={{ background: 'var(--background)' }}>
+		<section id='ariza' className='py-16 sm:py-20' style={{ background: 'var(--background)' }}>
 			<div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
 
 				{/* Header */}
@@ -376,83 +376,92 @@ export default function ApplicationSection() {
 						<div>
 							<SectionLabel icon={ClipboardList} text={a.devicesSection} />
 
-							<div className='rounded-xl border overflow-hidden mb-4' style={{ borderColor: 'var(--border)' }}>
-								{/* Mobile cards */}
-								{devices.length > 0 && (
-									<div className='sm:hidden divide-y' style={{ borderColor: 'var(--border)' }}>
-										{devices.map((d) => (
-											<div key={d.id} className='p-4 flex items-start justify-between gap-3'>
-												<div className='space-y-0.5 min-w-0'>
-													<p className='text-sm font-medium truncate' style={{ color: 'var(--foreground)' }}>{d.type}</p>
-													<p className='text-xs' style={{ color: 'var(--muted-foreground)' }}>
-														{[d.accuracyClass, d.measureRange, d.serialNumber].filter(Boolean).join(' · ') || '—'}
-													</p>
-													<p className='text-xs' style={{ color: 'var(--muted-foreground)' }}>
-														{verificationLabel[d.verificationRange] ?? d.verificationRange}
+							{devices.length === 0 ? (
+								<div
+									className='rounded-xl border-2 border-dashed py-10 flex flex-col items-center gap-2 mb-4'
+									style={{ borderColor: 'var(--border)' }}
+								>
+									<FileText size={30} style={{ color: 'var(--muted-foreground)', opacity: 0.25 }} />
+									<span className='text-sm' style={{ color: 'var(--muted-foreground)' }}>{a.emptyDevices}</span>
+								</div>
+							) : (
+								<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4'>
+									{devices.map((d, index) => (
+										<div
+											key={d.id}
+											className='flex flex-col gap-3 p-4 rounded-xl border transition-all hover:shadow-sm'
+											style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+										>
+											{/* Card header */}
+											<div className='flex items-start justify-between gap-2'>
+												<div className='flex items-center gap-2.5 min-w-0'>
+													<span
+														className='w-6 h-6 rounded-md flex items-center justify-center shrink-0 text-xs font-bold text-white'
+														style={{ background: 'hsl(205 45% 25%)' }}
+													>
+														{index + 1}
+													</span>
+													<p className='font-semibold text-sm leading-snug' style={{ color: 'var(--foreground)' }}>
+														{d.type}
 													</p>
 												</div>
 												<button
 													type='button'
 													onClick={() => setDevices((p) => p.filter((x) => x.id !== d.id))}
-													className='p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0'
+													className='p-1.5 rounded-lg transition-colors shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50'
 												>
-													<Trash2 size={15} />
+													<Trash2 size={14} />
 												</button>
 											</div>
-										))}
-									</div>
-								)}
 
-								{/* Desktop table */}
-								<div className={devices.length > 0 ? 'hidden sm:block' : 'block'}>
-									<table className='w-full text-sm'>
-										<thead>
-											<tr style={{ background: 'var(--secondary)' }}>
-												{[a.tableCols.type, a.tableCols.accuracy, a.tableCols.range, a.tableCols.serial, a.tableCols.verification, ''].map((col, i) => (
-													<th
-														key={i}
-														className='px-4 py-3 text-left text-xs font-semibold whitespace-nowrap'
-														style={{ color: 'var(--muted-foreground)', borderBottom: '1px solid var(--border)' }}
-													>
-														{col}
-													</th>
-												))}
-											</tr>
-										</thead>
-										<tbody>
-											{devices.length === 0 ? (
-												<tr>
-													<td colSpan={6} className='text-center py-12'>
-														<div className='flex flex-col items-center gap-2' style={{ color: 'var(--muted-foreground)' }}>
-															<FileText size={32} className='opacity-25' />
-															<span className='text-sm'>{a.emptyDevices}</span>
-														</div>
-													</td>
-												</tr>
-											) : devices.map((d) => (
-												<tr key={d.id} style={{ borderBottom: '1px solid var(--border)' }}>
-													<td className='px-4 py-3 font-medium' style={{ color: 'var(--foreground)' }}>{d.type}</td>
-													<td className='px-4 py-3' style={{ color: 'var(--muted-foreground)' }}>{d.accuracyClass || '—'}</td>
-													<td className='px-4 py-3' style={{ color: 'var(--muted-foreground)' }}>{d.measureRange || '—'}</td>
-													<td className='px-4 py-3' style={{ color: 'var(--muted-foreground)' }}>{d.serialNumber || '—'}</td>
-													<td className='px-4 py-3' style={{ color: 'var(--muted-foreground)' }}>
+											{/* Properties */}
+											<div
+												className='grid grid-cols-2 gap-x-4 gap-y-2.5 pt-3 border-t'
+												style={{ borderColor: 'var(--border)' }}
+											>
+												{d.accuracyClass && (
+													<div className='min-w-0'>
+														<p className='text-xs mb-0.5 truncate' style={{ color: 'var(--muted-foreground)' }}>
+															{a.tableCols.accuracy}
+														</p>
+														<p className='text-xs font-semibold truncate' style={{ color: 'hsl(205 45% 25%)' }}>
+															{d.accuracyClass}
+														</p>
+													</div>
+												)}
+												{d.measureRange && (
+													<div className='min-w-0'>
+														<p className='text-xs mb-0.5 truncate' style={{ color: 'var(--muted-foreground)' }}>
+															{a.tableCols.range}
+														</p>
+														<p className='text-xs font-semibold truncate' style={{ color: 'hsl(25 80% 45%)' }}>
+															{d.measureRange}
+														</p>
+													</div>
+												)}
+												{d.serialNumber && (
+													<div className='min-w-0'>
+														<p className='text-xs mb-0.5 truncate' style={{ color: 'var(--muted-foreground)' }}>
+															{a.tableCols.serial}
+														</p>
+														<p className='text-xs font-semibold truncate' style={{ color: 'hsl(142 60% 28%)' }}>
+															{d.serialNumber}
+														</p>
+													</div>
+												)}
+												<div className='min-w-0'>
+													<p className='text-xs mb-0.5 truncate' style={{ color: 'var(--muted-foreground)' }}>
+														{a.tableCols.verification}
+													</p>
+													<p className='text-xs font-semibold truncate' style={{ color: 'var(--foreground)' }}>
 														{verificationLabel[d.verificationRange] ?? d.verificationRange}
-													</td>
-													<td className='px-4 py-3 text-right'>
-														<button
-															type='button'
-															onClick={() => setDevices((p) => p.filter((x) => x.id !== d.id))}
-															className='p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors'
-														>
-															<Trash2 size={14} />
-														</button>
-													</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
+													</p>
+												</div>
+											</div>
+										</div>
+									))}
 								</div>
-							</div>
+							)}
 
 							<Button
 								variant='ghost'
@@ -508,7 +517,7 @@ export default function ApplicationSection() {
 								)}
 							</div>
 						)}
-						<Button variant='primary' size='lg' disabled={submitting} onClick={handleSubmit} className='sm:ml-auto'>
+						<Button variant='primary' size='lg' disabled={submitting} onClick={handleSubmit} className='w-full sm:w-auto sm:ml-auto'>
 							{submitting ? a.submitting : a.submit}
 						</Button>
 					</div>

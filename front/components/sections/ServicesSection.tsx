@@ -31,7 +31,7 @@ export default function ServicesSection() {
 	return (
 		<section
 			id='services'
-			className='py-24 bg-background relative overflow-hidden'
+			className='py-12 sm:py-16 lg:py-24 bg-background relative overflow-hidden'
 		>
 			{/* Dot pattern background */}
 			<div className='absolute inset-0 opacity-30'>
@@ -52,12 +52,12 @@ export default function ServicesSection() {
 						{t.services.title}
 					</span>
 					<h2
-						className='text-4xl md:text-5xl font-bold text-foreground mb-4'
+						className='text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4'
 						style={{ fontFamily: 'var(--font-display)' }}
 					>
 						{t.services.title}
 					</h2>
-					<p className='text-xl text-muted-foreground max-w-2xl mx-auto'>
+					<p className='text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto'>
 						{t.services.subtitle}
 					</p>
 				</div>
@@ -69,7 +69,7 @@ export default function ServicesSection() {
 						return (
 							<div
 								key={key}
-								className='group relative bg-card rounded-2xl p-8 shadow-soft hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-border/50 overflow-hidden animate-fade-up'
+								className='group relative bg-card rounded-2xl p-5 sm:p-8 shadow-soft hover:shadow-lg transition-all duration-500 hover:-translate-y-2 border border-border/50 overflow-hidden animate-fade-up'
 								style={{ animationDelay: `${index * 100}ms` }}
 							>
 								{/* Hover gradient overlay */}
@@ -107,7 +107,7 @@ export default function ServicesSection() {
 				{/* CTA */}
 				<div className='text-center mt-12'>
 					<Link
-						href='/contact'
+						href='/#ariza'
 						className='inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white text-base transition-all hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 group'
 						style={{ background: 'var(--gradient-hero)' }}
 					>

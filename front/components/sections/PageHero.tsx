@@ -22,7 +22,7 @@ export default function PageHero({ sectionKey }: PageHeroProps) {
 
   return (
     <section
-      className="relative pt-28 pb-16 overflow-hidden"
+      className="relative pt-24 sm:pt-28 pb-12 sm:pb-16 overflow-hidden"
       style={{ background: 'var(--gradient-hero)' }}
     >
       {/* Background pattern */}
@@ -39,7 +39,7 @@ export default function PageHero({ sectionKey }: PageHeroProps) {
         >
           {section.title}
         </h1>
-        <p className="text-white/75 text-lg max-w-2xl mx-auto">
+        <p className="text-white/75 text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
           {section.subtitle}
         </p>
       </div>
