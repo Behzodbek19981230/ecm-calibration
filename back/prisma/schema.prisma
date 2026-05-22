@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  subject   String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model TelegramConnect {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  chatId    String?
+  username  String?
+  connected Boolean  @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Application {
+  id             Int      @id @default(autoincrement())
+  userType       String
+  fullName       String?
+  orgName        String?
+  phone          String
+  email          String
+  branchRequest  Boolean  @default(false)
+  notifyMethod   String   @default("email")
+  telegramChatId String?
+  devices        String   @default("[]")
+  filePath       String?
+  status         String   @default("kutilmoqda")
+  createdAt      DateTime @default(now())
+}
+
+model Region {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  districts District[]
+}
+
+model District {
+  id       Int    @id @default(autoincrement())
+  name     String
+  region   Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  regionId Int
+}
+
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+  titleUz     String
+  titleRu     String
+  titleEn     String
+  excerptUz   String
+  excerptRu   String
+  excerptEn   String
+  contentUz   String   @default("")
+  contentRu   String   @default("")
+  contentEn   String   @default("")
+  category    String
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

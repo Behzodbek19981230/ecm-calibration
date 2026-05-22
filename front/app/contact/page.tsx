@@ -17,10 +17,19 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('sending');
-    await new Promise(r => setTimeout(r, 1500));
-    setStatus('success');
-    setForm({ name: '', email: '', phone: '', company: '', subject: '', message: '' });
-    setTimeout(() => setStatus('idle'), 4000);
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      }).then((r) => { if (!r.ok) throw new Error(); });
+      setStatus('success');
+      setForm({ name: '', email: '', phone: '', company: '', subject: '', message: '' });
+      setTimeout(() => setStatus('idle'), 4000);
+    } catch {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 4000);
+    }
   };
 
   return (

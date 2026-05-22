@@ -3,6 +3,7 @@ import ServicesSection from '@/components/sections/ServicesSection';
 import AboutSection from '@/components/sections/AboutSection';
 import ProcessSection from '@/components/sections/ProcessSection';
 import CTASection from '@/components/sections/CTASection';
+import ApplicationSection from '@/components/sections/ApplicationSection';
 
 export default function HomePage() {
   return (
@@ -11,6 +12,7 @@ export default function HomePage() {
       <ServicesSection />
       <AboutSection />
       <ProcessSection />
+      <ApplicationSection />
       <CTASection />
     </>
   );
