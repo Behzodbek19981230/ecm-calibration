@@ -63,7 +63,7 @@ model Application {
   telegramChatId String?
   devices        String       @default("[]")
   filePath       String?
-  status         String       @default("kutilmoqda")
+  status         String       @default("new")
   assignedToId   Int?
   assignedTo     User?        @relation("AssignedTo", fields: [assignedToId], references: [id])
   certificate    Certificate?

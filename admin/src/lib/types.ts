@@ -65,10 +65,11 @@ export interface Certificate {
 export interface DashboardStats {
   applications: {
     total: number;
-    kutilmoqda: number;
-    jarayonda: number;
-    bajarildi: number;
-    bekor_qilindi: number;
+    new: number;
+    contract: number;
+    acceptance: number;
+    laboratory: number;
+    completed: number;
     perMonth: Array<{ month: string; count: number }>;
   };
   users: { total: number };

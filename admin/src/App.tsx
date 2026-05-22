@@ -8,6 +8,7 @@ import Blog from './pages/Blog';
 import BlogEdit from './pages/BlogEdit';
 import Regions from './pages/Regions';
 import Applications from './pages/Applications';
+import ApplicationDetail from './pages/ApplicationDetail';
 import Certificates from './pages/Certificates';
 import Users from './pages/Users';
 import { isAuthenticated, hasRole } from './lib/auth';
@@ -47,6 +48,7 @@ export default function App() {
               <Route path="blog/:id/edit" element={<BlogEdit />} />
               <Route path="regions" element={<Regions />} />
               <Route path="applications" element={<Applications />} />
+              <Route path="applications/:id" element={<ApplicationDetail />} />
               <Route path="certificates" element={<PrivateRoute><Certificates /></PrivateRoute>} />
               <Route
                 path="users"

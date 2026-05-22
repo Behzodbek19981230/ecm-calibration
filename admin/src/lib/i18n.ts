@@ -17,7 +17,7 @@ const uz = {
     add: "Qo'shish", edit: 'Tahrirlash', create: 'Yaratish', creating: 'Yaratilmoqda...',
     loading: 'Yuklanmoqda...', error: 'Xatolik yuz berdi', actions: 'Amallar',
     view: "Ko'rish", total: 'Jami', new: 'Yangi', required: '*',
-    select: '— Tanlang —', optional: '(ixtiyoriy)', update: 'Yangilash',
+    select: '— Tanlang —', optional: '(ixtiyoriy)', update: 'Yangilash', status: 'Holat',
   },
   login: {
     subtitle: 'Admin boshqaruv paneli', heading: 'Tizimga kirish',
@@ -35,8 +35,11 @@ const uz = {
     noApps: "Hozircha ariza yo'q", noMessages: "Hozircha xabar yo'q",
   },
   status: {
-    kutilmoqda: 'Kutilmoqda', jarayonda: 'Jarayonda',
-    bajarildi: 'Bajarildi', bekor_qilindi: 'Bekor qilindi',
+    new:        'Yangi',
+    contract:   'Shartnoma tuzish',
+    acceptance: 'Qabul qilish',
+    laboratory: 'Laboratoriya tekshiruvida',
+    completed:  'Yakunlangan',
   },
   applications: {
     title: 'Arizalar', subtitle: 'Kelgan arizalarni boshqarish',
@@ -114,7 +117,7 @@ const ru: typeof uz = {
     add: 'Добавить', edit: 'Редактировать', create: 'Создать', creating: 'Создание...',
     loading: 'Загрузка...', error: 'Произошла ошибка', actions: 'Действия',
     view: 'Просмотр', total: 'Всего', new: 'Новый', required: '*',
-    select: '— Выберите —', optional: '(необязательно)', update: 'Обновить',
+    select: '— Выберите —', optional: '(необязательно)', update: 'Обновить', status: 'Статус',
   },
   login: {
     subtitle: 'Панель управления администратора', heading: 'Вход в систему',
@@ -132,8 +135,11 @@ const ru: typeof uz = {
     noApps: 'Заявок пока нет', noMessages: 'Сообщений пока нет',
   },
   status: {
-    kutilmoqda: 'Ожидает', jarayonda: 'В процессе',
-    bajarildi: 'Выполнено', bekor_qilindi: 'Отменено',
+    new:        'Новый',
+    contract:   'Заключение договора',
+    acceptance: 'Приёмка',
+    laboratory: 'В лаборатории',
+    completed:  'Завершено',
   },
   applications: {
     title: 'Заявки', subtitle: 'Управление заявками',
@@ -211,7 +217,7 @@ const en: typeof uz = {
     add: 'Add', edit: 'Edit', create: 'Create', creating: 'Creating...',
     loading: 'Loading...', error: 'An error occurred', actions: 'Actions',
     view: 'View', total: 'Total', new: 'New', required: '*',
-    select: '— Select —', optional: '(optional)', update: 'Update',
+    select: '— Select —', optional: '(optional)', update: 'Update', status: 'Status',
   },
   login: {
     subtitle: 'Admin control panel', heading: 'Sign In',
@@ -229,8 +235,11 @@ const en: typeof uz = {
     noApps: 'No applications yet', noMessages: 'No messages yet',
   },
   status: {
-    kutilmoqda: 'Pending', jarayonda: 'In progress',
-    bajarildi: 'Completed', bekor_qilindi: 'Cancelled',
+    new:        'New',
+    contract:   'Contract signing',
+    acceptance: 'Acceptance',
+    laboratory: 'In laboratory',
+    completed:  'Completed',
   },
   applications: {
     title: 'Applications', subtitle: 'Manage incoming applications',

@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import {
-  ClipboardList, Clock, Loader2, CheckCircle2, XCircle,
-  Users, Award, ShieldCheck, Mail, TrendingUp,
+  ClipboardList, Users, Award, ShieldCheck, Mail, TrendingUp,
 } from 'lucide-react';
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend,
@@ -33,10 +32,6 @@ function StatCard({ icon, label, value, bg, iconColor }: StatCardProps) {
   );
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  kutilmoqda: '#f59e0b', jarayonda: '#3b82f6',
-  bajarildi: '#22c55e', bekor_qilindi: '#ef4444',
-};
 
 function formatMonth(key: string) {
   return new Date(key + '-01').toLocaleDateString('uz-UZ', { month: 'short', year: '2-digit' });
@@ -68,10 +63,11 @@ export default function Dashboard() {
 
   const pieData = stats
     ? [
-        { name: t.status.kutilmoqda,    value: stats.applications.kutilmoqda,    fill: STATUS_COLORS.kutilmoqda },
-        { name: t.status.jarayonda,     value: stats.applications.jarayonda,     fill: STATUS_COLORS.jarayonda },
-        { name: t.status.bajarildi,     value: stats.applications.bajarildi,     fill: STATUS_COLORS.bajarildi },
-        { name: t.status.bekor_qilindi, value: stats.applications.bekor_qilindi, fill: STATUS_COLORS.bekor_qilindi },
+        { name: t.status.new,        value: stats.applications.new,        fill: '#3b82f6' },
+        { name: t.status.contract,   value: stats.applications.contract,   fill: '#a855f7' },
+        { name: t.status.acceptance, value: stats.applications.acceptance, fill: '#f59e0b' },
+        { name: t.status.laboratory, value: stats.applications.laboratory, fill: '#14b8a6' },
+        { name: t.status.completed,  value: stats.applications.completed,  fill: '#22c55e' },
       ].filter((d) => d.value > 0)
     : [];
 
@@ -97,17 +93,12 @@ export default function Dashboard() {
         </div>
       ) : stats ? (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <StatCard icon={<ClipboardList size={18} />} label={t.dashboard.totalApps}   value={stats.applications.total}         bg="bg-blue-50 dark:bg-blue-950"    iconColor="text-blue-600" />
-            <StatCard icon={<Clock size={18} />}         label={t.dashboard.pending}      value={stats.applications.kutilmoqda}    bg="bg-amber-50 dark:bg-amber-950"  iconColor="text-amber-500" />
-            <StatCard icon={<Loader2 size={18} />}       label={t.dashboard.inProgress}   value={stats.applications.jarayonda}     bg="bg-sky-50 dark:bg-sky-950"      iconColor="text-sky-500" />
-            <StatCard icon={<CheckCircle2 size={18} />}  label={t.dashboard.completed}    value={stats.applications.bajarildi}     bg="bg-green-50 dark:bg-green-950"  iconColor="text-green-600" />
-          </div>
+          {/* Key stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <StatCard icon={<XCircle size={18} />}       label={t.dashboard.cancelled}    value={stats.applications.bekor_qilindi} bg="bg-red-50 dark:bg-red-950"      iconColor="text-red-500" />
-            <StatCard icon={<Users size={18} />}         label={t.dashboard.usersCount}   value={stats.users.total}               bg="bg-purple-50 dark:bg-purple-950" iconColor="text-purple-600" />
-            <StatCard icon={<Award size={18} />}         label={t.dashboard.certs}        value={stats.certificates.total}         bg="bg-teal-50 dark:bg-teal-950"    iconColor="text-teal-600" />
-            <StatCard icon={<ShieldCheck size={18} />}   label={t.dashboard.activeCerts}  value={stats.certificates.active}        bg="bg-emerald-50 dark:bg-emerald-950" iconColor="text-emerald-600" />
+            <StatCard icon={<ClipboardList size={18} />} label={t.dashboard.totalApps}   value={stats.applications.total}   bg="bg-blue-50 dark:bg-blue-950"       iconColor="text-blue-600" />
+            <StatCard icon={<Users size={18} />}         label={t.dashboard.usersCount}  value={stats.users.total}          bg="bg-purple-50 dark:bg-purple-950"   iconColor="text-purple-600" />
+            <StatCard icon={<Award size={18} />}         label={t.dashboard.certs}       value={stats.certificates.total}   bg="bg-teal-50 dark:bg-teal-950"       iconColor="text-teal-600" />
+            <StatCard icon={<ShieldCheck size={18} />}   label={t.dashboard.activeCerts} value={stats.certificates.active}  bg="bg-emerald-50 dark:bg-emerald-950" iconColor="text-emerald-600" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">

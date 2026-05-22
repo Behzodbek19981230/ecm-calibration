@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
+import api from '../lib/api';
 import {
   LayoutDashboard, Mail, MapPin, ClipboardList, Award,
-  Users, LogOut, Menu, X, Sun, Moon,
+  Users, LogOut, Menu, X, Sun, Moon, ChevronDown,
 } from 'lucide-react';
 import { getRoles, logout } from '../lib/auth';
 import { useLang } from '../lib/LangContext';
@@ -12,10 +13,22 @@ import type { Lang } from '../lib/i18n';
 const LANG_FLAGS: Record<Lang, string> = { uz: '🇺🇿', ru: '🇷🇺', en: '🇬🇧' };
 const LANGS: Lang[] = ['uz', 'ru', 'en'];
 
+const APP_STATUSES = ['new', 'contract', 'acceptance', 'laboratory', 'completed'] as const;
+
+const STATUS_COLORS: Record<string, string> = {
+  new:        'bg-blue-500',
+  contract:   'bg-purple-500',
+  acceptance: 'bg-amber-500',
+  laboratory: 'bg-teal-500',
+  completed:  'bg-green-500',
+};
+
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [appsOpen, setAppsOpen] = useState(false);
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const { t, lang, setLang } = useLang();
   const { theme, toggle: toggleTheme } = useTheme();
 
@@ -32,19 +45,44 @@ export default function Layout() {
     .slice(0, 2)
     .toUpperCase() || 'AD';
 
-  const baseNavItems = [
+  /* auto-expand applications submenu */
+  useEffect(() => {
+    if (location.pathname.startsWith('/applications')) setAppsOpen(true);
+  }, [location.pathname]);
+
+  /* fetch application counts */
+  useEffect(() => {
+    api.get('/stats/dashboard')
+      .then((r) => setCounts(r.data.applications))
+      .catch(() => {});
+  }, [location.pathname]);
+
+  const onApps = location.pathname.startsWith('/applications');
+
+  /* active sub-status */
+  const activeStatus = onApps
+    ? new URLSearchParams(location.search).get('status') ?? ''
+    : '';
+
+  const topNavItems = [
     { to: '/dashboard',    icon: LayoutDashboard, label: t.nav.dashboard },
-    { to: '/applications', icon: ClipboardList,    label: t.nav.applications },
     { to: '/certificates', icon: Award,            label: t.nav.certificates },
     { to: '/contacts',     icon: Mail,             label: t.nav.contacts },
     { to: '/regions',      icon: MapPin,           label: t.nav.regions },
   ];
-  const navItems = roles.includes('admin')
-    ? [...baseNavItems, { to: '/users', icon: Users, label: t.nav.users }]
-    : baseNavItems;
 
-  const pageTitle = navItems.find(n => location.pathname.startsWith(n.to))?.label
-    ?? (location.pathname.startsWith('/blog') ? t.nav.blog : t.nav.dashboard);
+  const adminItems = roles.includes('admin')
+    ? [...topNavItems, { to: '/users', icon: Users, label: t.nav.users }]
+    : topNavItems;
+
+  const pageTitle = (() => {
+    if (location.pathname.startsWith('/applications')) {
+      if (activeStatus) return t.status[activeStatus as keyof typeof t.status] ?? t.nav.applications;
+      return t.nav.applications;
+    }
+    return adminItems.find(n => location.pathname.startsWith(n.to))?.label
+      ?? (location.pathname.startsWith('/blog') ? t.nav.blog : 'ECM Admin');
+  })();
 
   function handleLogout() { logout(); navigate('/login'); }
 
@@ -53,10 +91,7 @@ export default function Layout() {
 
       {/* Mobile backdrop */}
       {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-          onClick={() => setOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setOpen(false)} />
       )}
 
       {/* ─── Sidebar ─── */}
@@ -71,20 +106,14 @@ export default function Layout() {
 
         {/* Logo */}
         <div className="flex items-center gap-3 h-14 px-4 border-b border-gray-100 dark:border-slate-700 shrink-0">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'hsl(205,45%,25%)' }}
-          >
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'hsl(205,45%,25%)' }}>
             <img src="/logo.png" alt="ECM" className="h-5 w-auto object-contain brightness-0 invert" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-gray-800 dark:text-slate-100 leading-tight">{t.nav.brandName}</p>
             <p className="text-[11px] text-gray-400 dark:text-slate-500 leading-none mt-0.5">{t.nav.adminPanel}</p>
           </div>
-          <button
-            onClick={() => setOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-          >
+          <button onClick={() => setOpen(false)} className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -95,7 +124,91 @@ export default function Layout() {
             {t.nav.menu}
           </p>
           <div className="space-y-0.5">
-            {navItems.map(({ to, icon: Icon, label }) => (
+
+            {/* Dashboard */}
+            <NavLink
+              to="/dashboard"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? 'font-semibold'
+                    : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
+                }`
+              }
+              style={({ isActive }) => isActive ? { background: 'hsl(205 45% 25% / 0.09)', color: 'hsl(205,45%,20%)' } : {}}
+            >
+              <LayoutDashboard size={17} />
+              {t.nav.dashboard}
+            </NavLink>
+
+            {/* ── Arizalar accordion ── */}
+            <div>
+              {/* Parent button */}
+              <button
+                onClick={() => {
+                  setAppsOpen((p) => !p);
+                  if (!onApps) navigate('/applications');
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  onApps
+                    ? 'font-semibold'
+                    : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
+                }`}
+                style={onApps ? { background: 'hsl(205 45% 25% / 0.09)', color: 'hsl(205,45%,20%)' } : {}}
+              >
+                <ClipboardList size={17} />
+                <span className="flex-1 text-left">{t.nav.applications}</span>
+                {counts.total > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-slate-300 min-w-[18px] text-center">
+                    {counts.total}
+                  </span>
+                )}
+                <ChevronDown
+                  size={13}
+                  className={`transition-transform duration-200 shrink-0 ${appsOpen ? 'rotate-180' : ''} opacity-50`}
+                />
+              </button>
+
+              {/* Sub-items */}
+              {appsOpen && (
+                <div className="mt-0.5 ml-3 pl-3 border-l-2 border-gray-100 dark:border-slate-700 space-y-0.5">
+                  {APP_STATUSES.map((status) => {
+                    const isActive = activeStatus === status;
+                    const label = t.status[status as keyof typeof t.status];
+                    const count = (counts[status] as number | undefined) ?? 0;
+                    return (
+                      <Link
+                        key={status}
+                        to={`/applications?status=${status}`}
+                        onClick={() => setOpen(false)}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                          isActive
+                            ? 'font-semibold'
+                            : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
+                        }`}
+                        style={isActive ? { background: 'hsl(205 45% 25% / 0.09)', color: 'hsl(205,45%,20%)' } : {}}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${count > 0 ? STATUS_COLORS[status] : 'bg-gray-300 dark:bg-slate-600'}`} />
+                        <span className="flex-1 truncate">{label}</span>
+                        {count > 0 && (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${
+                            isActive
+                              ? 'bg-white/30 text-current'
+                              : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'
+                          }`}>
+                            {count}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Other nav items */}
+            {adminItems.map(({ to, icon: Icon, label }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -103,15 +216,17 @@ export default function Layout() {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? 'font-semibold bg-[hsl(205_45%_25%_/_0.09)] text-[hsl(205,45%,20%)] dark:bg-primary dark:text-white dark:shadow-sm'
+                      ? 'font-semibold'
                       : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
                   }`
                 }
+                style={({ isActive }) => isActive ? { background: 'hsl(205 45% 25% / 0.09)', color: 'hsl(205,45%,20%)' } : {}}
               >
                 <Icon size={17} />
                 {label}
               </NavLink>
             ))}
+
           </div>
         </nav>
 
@@ -123,9 +238,7 @@ export default function Layout() {
                 key={l}
                 onClick={() => setLang(l)}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  lang === l
-                    ? 'text-white'
-                    : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  lang === l ? 'text-white' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700'
                 }`}
                 style={lang === l ? { background: 'hsl(205,45%,25%)' } : {}}
                 title={t.lang[l]}
@@ -138,18 +251,13 @@ export default function Layout() {
 
         {/* User + Logout */}
         <div className="px-3 py-3 border-t border-gray-100 dark:border-slate-700 shrink-0">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold text-white"
-              style={{ background: 'hsl(205,45%,25%)' }}
-            >
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors group">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold text-white" style={{ background: 'hsl(205,45%,25%)' }}>
               {initials}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-800 dark:text-slate-100 truncate leading-tight">{fullName}</p>
-              {roleLabel && (
-                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">{roleLabel}</p>
-              )}
+              {roleLabel && <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">{roleLabel}</p>}
             </div>
             <button
               onClick={handleLogout}
@@ -164,8 +272,6 @@ export default function Layout() {
 
       {/* ─── Main ─── */}
       <div className="flex flex-col flex-1 min-w-0">
-
-        {/* Top header */}
         <header className="h-14 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center gap-3 px-4 sm:px-6 shrink-0">
           <button
             onClick={() => setOpen(true)}
@@ -182,7 +288,6 @@ export default function Layout() {
 
           <div className="flex-1" />
 
-          {/* Theme toggle */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
@@ -191,11 +296,7 @@ export default function Layout() {
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* Avatar (mobile) */}
-          <div
-            className="lg:hidden w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0"
-            style={{ background: 'hsl(205,45%,25%)' }}
-          >
+          <div className="lg:hidden w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white shrink-0" style={{ background: 'hsl(205,45%,25%)' }}>
             {initials}
           </div>
         </header>

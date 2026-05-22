@@ -10,21 +10,23 @@ router.get('/dashboard', requireAuth, async (_req: AuthRequest, res: Response): 
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
   const [
-    totalApps,
-    kutilmoqda,
-    jarayonda,
-    bajarildi,
-    bekor_qilindi,
+    total,
+    newApps,
+    contract,
+    acceptance,
+    laboratory,
+    completed,
     totalUsers,
     totalCerts,
     activeCerts,
     recentApps,
   ] = await Promise.all([
     prisma.application.count(),
-    prisma.application.count({ where: { status: 'kutilmoqda' } }),
-    prisma.application.count({ where: { status: 'jarayonda' } }),
-    prisma.application.count({ where: { status: 'bajarildi' } }),
-    prisma.application.count({ where: { status: 'bekor_qilindi' } }),
+    prisma.application.count({ where: { status: 'new' } }),
+    prisma.application.count({ where: { status: 'contract' } }),
+    prisma.application.count({ where: { status: 'acceptance' } }),
+    prisma.application.count({ where: { status: 'laboratory' } }),
+    prisma.application.count({ where: { status: 'completed' } }),
     prisma.user.count({ where: { isActive: true } }),
     prisma.certificate.count(),
     prisma.certificate.count({ where: { status: 'active' } }),
@@ -34,14 +36,12 @@ router.get('/dashboard', requireAuth, async (_req: AuthRequest, res: Response): 
     }),
   ]);
 
-  // Group by month in JS
   const monthMap: Record<string, number> = {};
   for (const app of recentApps) {
-    const key = app.createdAt.toISOString().slice(0, 7); // "2025-03"
+    const key = app.createdAt.toISOString().slice(0, 7);
     monthMap[key] = (monthMap[key] ?? 0) + 1;
   }
 
-  // Fill last 6 months (including empty months)
   const perMonth: Array<{ month: string; count: number }> = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date();
@@ -51,20 +51,9 @@ router.get('/dashboard', requireAuth, async (_req: AuthRequest, res: Response): 
   }
 
   res.json({
-    applications: {
-      total: totalApps,
-      kutilmoqda,
-      jarayonda,
-      bajarildi,
-      bekor_qilindi,
-      perMonth,
-    },
+    applications: { total, new: newApps, contract, acceptance, laboratory, completed, perMonth },
     users: { total: totalUsers },
-    certificates: {
-      total: totalCerts,
-      active: activeCerts,
-      revoked: totalCerts - activeCerts,
-    },
+    certificates: { total: totalCerts, active: activeCerts, revoked: totalCerts - activeCerts },
   });
 });
 

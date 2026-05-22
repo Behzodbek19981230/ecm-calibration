@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { sendCertificate } from '../bot';
-import { sendApplicationConfirmation, sendApplicationNotification } from '../email';
+import { sendApplicationNotification } from '../email';
 import { z } from 'zod';
 
 const router = Router();
@@ -46,14 +46,15 @@ const applicationSchema = z.object({
   }, z.array(z.any()).default([])),
 });
 
-const VALID_STATUSES = ['kutilmoqda', 'jarayonda', 'bajarildi', 'bekor_qilindi'] as const;
+const VALID_STATUSES = ['new', 'contract', 'acceptance', 'laboratory', 'completed'] as const;
 type AppStatus = typeof VALID_STATUSES[number];
 
 const STATUS_LABELS: Record<AppStatus, string> = {
-  kutilmoqda: 'Kutilmoqda',
-  jarayonda: 'Jarayonda',
-  bajarildi: 'Bajarildi',
-  bekor_qilindi: 'Bekor qilindi',
+  new:        'Yangi',
+  contract:   'Shartnoma tuzish',
+  acceptance: 'Qabul qilish',
+  laboratory: 'Laboratoriya tekshiruvida',
+  completed:  'Yakunlangan',
 };
 
 // Public: submit application (multipart/form-data)
@@ -69,21 +70,11 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
   const application = await prisma.application.create({
     data: {
       ...rest,
+      status: 'new',
       devices: JSON.stringify(devices),
       filePath: req.file ? req.file.filename : null,
     },
   });
-
-  if (rest.notifyMethod === 'email' && rest.email) {
-    const applicantName = rest.userType === 'individual'
-      ? (rest.fullName ?? rest.email)
-      : (rest.orgName ?? rest.email);
-    sendApplicationConfirmation({
-      to: rest.email,
-      applicantName,
-      applicationId: application.id,
-    }).catch((err) => console.error('Email yuborishda xato:', err));
-  }
 
   res.status(201).json(application);
 });
