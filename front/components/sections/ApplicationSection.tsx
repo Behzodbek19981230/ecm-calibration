@@ -99,8 +99,10 @@ export default function ApplicationSection() {
 	const [branchRequest, setBranchRequest] = useState(false);
 	const [notifyMethod, setNotifyMethod] = useState<'email' | 'telegram'>('email');
 	const [telegramChatId, setTelegramChatId] = useState('');
+	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [submitting, setSubmitting] = useState(false);
 	const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+	const [submittedId, setSubmittedId] = useState<number | null>(null);
 	const [attachedFile, setAttachedFile] = useState<File | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -154,7 +156,21 @@ export default function ApplicationSection() {
 		setModalOpen(false);
 	};
 
+	const validate = (): boolean => {
+		const errs: Record<string, string> = {};
+		const v = a.validation;
+		if (userType === 'individual' && !fullName.trim()) errs.fullName = v.required;
+		if (userType === 'legal' && !orgName.trim()) errs.orgName = v.required;
+		if (!phone.trim()) errs.phone = v.required;
+		if (!email.trim()) errs.email = v.required;
+		else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = v.emailInvalid;
+		if (devices.length === 0) errs.devices = v.addDevice;
+		setErrors(errs);
+		return Object.keys(errs).length === 0;
+	};
+
 	const handleSubmit = async () => {
+		if (!validate()) return;
 		setSubmitting(true);
 		setSubmitStatus('idle');
 		try {
@@ -172,6 +188,8 @@ export default function ApplicationSection() {
 
 			const res = await fetch(`${API}/api/applications`, { method: 'POST', body: fd });
 			if (!res.ok) throw new Error();
+			const data = await res.json();
+			setSubmittedId(data.id ?? null);
 			setSubmitStatus('success');
 			setAttachedFile(null);
 			if (fileInputRef.current) fileInputRef.current.value = '';
@@ -180,6 +198,22 @@ export default function ApplicationSection() {
 		} finally {
 			setSubmitting(false);
 		}
+	};
+
+	const handleReset = () => {
+		setSubmitStatus('idle');
+		setSubmittedId(null);
+		setErrors({});
+		setFullName('');
+		setOrgName('');
+		setPhone('');
+		setEmail('');
+		setBranchRequest(false);
+		setNotifyMethod('email');
+		setTelegramChatId('');
+		setDevices([]);
+		setAttachedFile(null);
+		if (fileInputRef.current) fileInputRef.current.value = '';
 	};
 
 	return (
@@ -204,6 +238,49 @@ export default function ApplicationSection() {
 					<p className='text-sm' style={{ color: 'var(--muted-foreground)' }}>{a.subtitle}</p>
 				</div>
 
+				{submitStatus === 'success' && (
+					<div
+						className='rounded-2xl border overflow-hidden'
+						style={{ background: 'var(--card)', borderColor: 'var(--border)', boxShadow: '0 4px 24px 0 rgb(0 0 0 / 0.06)' }}
+					>
+						<div className='flex flex-col items-center text-center px-8 py-16 gap-6'>
+							<div
+								className='w-20 h-20 rounded-full flex items-center justify-center'
+								style={{ background: 'hsl(142 70% 45% / 0.12)' }}
+							>
+								<svg width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='hsl(142 70% 38%)' strokeWidth='2.2' strokeLinecap='round' strokeLinejoin='round'>
+									<polyline points='20 6 9 17 4 12' />
+								</svg>
+							</div>
+							<div className='space-y-2'>
+								<h3 className='text-xl font-bold' style={{ color: 'var(--foreground)', fontFamily: 'Montserrat, sans-serif' }}>
+									{a.successTitle}
+								</h3>
+								{submittedId && (
+									<p className='text-sm font-medium' style={{ color: 'hsl(205 45% 30%)' }}>
+										{a.successId}: <strong>#{submittedId}</strong>
+									</p>
+								)}
+								<p className='text-sm max-w-sm mx-auto' style={{ color: 'var(--muted-foreground)' }}>
+									{notifyMethod === 'email'
+										? a.successEmail.replace('{email}', email)
+										: a.successTelegram}
+								</p>
+							</div>
+							<button
+								type='button'
+								onClick={handleReset}
+								className='mt-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium text-white transition-all'
+								style={{ background: 'var(--gradient-hero)' }}
+							>
+								<Plus size={15} />
+								{a.successNewApp}
+							</button>
+						</div>
+					</div>
+				)}
+
+				{submitStatus !== 'success' && (
 				<div
 					className='rounded-2xl border overflow-hidden'
 					style={{ background: 'var(--card)', borderColor: 'var(--border)', boxShadow: '0 4px 24px 0 rgb(0 0 0 / 0.06)' }}
@@ -221,12 +298,12 @@ export default function ApplicationSection() {
 									onChange={setUserType}
 								/>
 								{userType === 'individual' ? (
-									<Input label={a.fullName} value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={a.fullNamePlaceholder} />
+									<Input label={a.fullName} value={fullName} onChange={(e) => { setFullName(e.target.value); setErrors((p) => ({ ...p, fullName: '' })); }} placeholder={a.fullNamePlaceholder} error={errors.fullName} />
 								) : (
-									<Input label={a.orgName} value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder={a.orgNamePlaceholder} />
+									<Input label={a.orgName} value={orgName} onChange={(e) => { setOrgName(e.target.value); setErrors((p) => ({ ...p, orgName: '' })); }} placeholder={a.orgNamePlaceholder} error={errors.orgName} />
 								)}
-								<Input label={a.phone} type='tel' value={phone} onChange={(e) => setPhone(e.target.value)} placeholder='+998 XX XXX XX XX' />
-								<Input label={a.email} type='email' value={email} onChange={(e) => setEmail(e.target.value)} placeholder='example@mail.com' />
+								<Input label={a.phone} type='tel' value={phone} onChange={(e) => { setPhone(e.target.value); setErrors((p) => ({ ...p, phone: '' })); }} placeholder='+998 XX XXX XX XX' error={errors.phone} />
+								<Input label={a.email} type='email' value={email} onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: '' })); }} placeholder='example@mail.com' error={errors.email} />
 							</div>
 							{userType === 'legal' && (
 								<div className='mt-3'>
@@ -381,10 +458,13 @@ export default function ApplicationSection() {
 								variant='ghost'
 								size='sm'
 								icon={<Plus size={14} />}
-								onClick={() => { setDeviceForm(emptyDeviceForm); setModalOpen(true); }}
+								onClick={() => { setDeviceForm(emptyDeviceForm); setModalOpen(true); setErrors((p) => ({ ...p, devices: '' })); }}
 							>
 								{a.addDevice}
 							</Button>
+							{errors.devices && (
+								<p className='text-xs text-red-500 mt-1'>{errors.devices}</p>
+							)}
 						</div>
 					</div>
 
@@ -393,9 +473,6 @@ export default function ApplicationSection() {
 						className='flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-6 sm:px-8 py-5 border-t'
 						style={{ borderColor: 'var(--border)', background: 'var(--secondary)' }}
 					>
-						{submitStatus === 'success' && (
-							<p className='text-sm text-green-700 font-medium'>✅ {a.success}</p>
-						)}
 						{submitStatus === 'error' && (
 							<p className='text-sm text-red-600 font-medium'>❌ {a.error}</p>
 						)}
@@ -436,7 +513,7 @@ export default function ApplicationSection() {
 						</Button>
 					</div>
 				</div>
-			</div>
+				)}
 
 			{/* Device modal */}
 			<Modal open={modalOpen} onClose={() => setModalOpen(false)} title={m.title}>
@@ -514,6 +591,7 @@ export default function ApplicationSection() {
 					</div>
 				</div>
 			</Modal>
+			</div>
 		</section>
 	);
 }

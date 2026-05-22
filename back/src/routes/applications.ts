@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { sendCertificate } from '../bot';
+import { sendApplicationConfirmation, sendApplicationNotification } from '../email';
 import { z } from 'zod';
 
 const router = Router();
@@ -73,6 +74,17 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
     },
   });
 
+  if (rest.notifyMethod === 'email' && rest.email) {
+    const applicantName = rest.userType === 'individual'
+      ? (rest.fullName ?? rest.email)
+      : (rest.orgName ?? rest.email);
+    sendApplicationConfirmation({
+      to: rest.email,
+      applicantName,
+      applicationId: application.id,
+    }).catch((err) => console.error('Email yuborishda xato:', err));
+  }
+
   res.status(201).json(application);
 });
 
@@ -115,8 +127,20 @@ router.post('/:id/notify', requireAuth, async (req: AuthRequest, res: Response):
   if (application.notifyMethod === 'telegram' && application.telegramChatId) {
     await sendCertificate(application.telegramChatId, text);
     res.json({ sent: true, method: 'telegram' });
+  } else if (application.notifyMethod === 'email' && application.email) {
+    const applicantName = application.userType === 'individual'
+      ? (application.fullName ?? application.email)
+      : (application.orgName ?? application.email);
+    await sendApplicationNotification({
+      to: application.email,
+      applicantName,
+      applicationId: application.id,
+      statusLabel,
+      message,
+    });
+    res.json({ sent: true, method: 'email' });
   } else {
-    res.json({ sent: false, method: 'email', note: 'Email sending not wired yet' });
+    res.json({ sent: false, note: 'Bildirishnoma usuli aniqlanmadi' });
   }
 });
 
