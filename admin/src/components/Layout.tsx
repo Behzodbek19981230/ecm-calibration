@@ -251,7 +251,7 @@ export default function Layout() {
 								style={lang === l ? { background: 'hsl(205,45%,25%)' } : {}}
 								title={t.lang[l]}
 							>
-								{/* {LANG_FLAGS[l]} {l.toUpperCase()} */}
+								{LANG_FLAGS[l]}
 							</button>
 						))}
 					</div>
