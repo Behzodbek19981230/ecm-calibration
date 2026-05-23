@@ -11,7 +11,7 @@ import regionRoutes from './routes/regions';
 import userRoutes from './routes/users';
 import certificateRoutes from './routes/certificates';
 import statsRoutes from './routes/stats';
-import { initBot } from './bot';
+import { initBot, stopBot } from './bot';
 
 dotenv.config();
 
@@ -51,6 +51,14 @@ app.use('/api/stats', statsRoutes);
 
 initBot();
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
+
+const shutdown = async () => {
+  await stopBot();
+  server.close(() => process.exit(0));
+};
+
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
