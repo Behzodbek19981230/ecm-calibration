@@ -18,10 +18,8 @@ const fetchCertificates = (): Promise<Certificate[]> =>
 
 const fetchCompletedApps = (): Promise<Application[]> =>
   api
-    .get('/applications')
-    .then((r) =>
-      (r.data as Application[]).filter((a) => a.status === 'completed' && !a.certificate),
-    );
+    .get('/applications', { params: { status: 'completed' } })
+    .then((r) => r.data as Application[]);
 
 const createCertificate = (fd: FormData): Promise<Certificate> =>
   api

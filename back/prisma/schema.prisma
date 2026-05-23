@@ -67,7 +67,7 @@ model Application {
   status           String            @default("new")
   assignedToId     Int?
   assignedTo       User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
-  certificate      Certificate?
+  certificates     Certificate[]
   rejectionLetter  RejectionLetter?
   createdAt        DateTime          @default(now())
 }
@@ -86,15 +86,19 @@ model RejectionLetter {
 model Certificate {
   id            Int         @id @default(autoincrement())
   certNumber    String      @unique
-  applicationId Int         @unique
+  applicationId Int
   application   Application @relation(fields: [applicationId], references: [id])
   issuedById    Int
   issuedBy      User        @relation("IssuedBy", fields: [issuedById], references: [id])
   issuedAt      DateTime    @default(now())
-  expiresAt     DateTime
+  expiresAt     DateTime?
   filePath      String?
+  url           String?
   notes         String?
   status        String      @default("active")
+  deviceName    String?
+  serialNumber  String?
+  deviceIndex   Int?
   createdAt     DateTime    @default(now())
 }
 

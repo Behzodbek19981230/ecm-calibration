@@ -68,13 +68,6 @@ router.post('/', requireAuth, requireRole('admin', 'manager'), upload.single('fi
   const appId = Number(applicationId);
   const app = await prisma.application.findUnique({ where: { id: appId } });
   if (!app) { res.status(404).json({ error: 'Ariza topilmadi' }); return; }
-  if (app.status !== 'bajarildi') {
-    res.status(400).json({ error: 'Faqat "bajarildi" statusli ariza uchun sertifikat beriladi' });
-    return;
-  }
-
-  const existing = await prisma.certificate.findUnique({ where: { applicationId: appId } });
-  if (existing) { res.status(409).json({ error: 'Bu ariza uchun sertifikat allaqachon mavjud' }); return; }
 
   const certNumber = await generateCertNumber();
   const cert = await prisma.certificate.create({

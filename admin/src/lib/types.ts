@@ -43,7 +43,7 @@ export interface Application {
   status: string;
   assignedToId?: number;
   assignedTo?: User;
-  certificate?: Certificate;
+  certificates?: Certificate[];
   createdAt: string;
 }
 
@@ -51,14 +51,18 @@ export interface Certificate {
   id: number;
   certNumber: string;
   applicationId: number;
-  application: Application;
+  application?: Application;
   issuedById: number;
-  issuedBy: User;
+  issuedBy?: User;
   issuedAt: string;
   expiresAt: string;
   filePath?: string;
+  url?: string;
   notes?: string;
   status: 'active' | 'revoked';
+  deviceName?: string;
+  serialNumber?: string;
+  deviceIndex?: number;
   createdAt: string;
 }
 
