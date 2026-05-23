@@ -35,8 +35,10 @@ const STATUS_COLORS: Record<string, string> = {
 	rejected: 'bg-red-500',
 };
 
-const ACTIVE_CLS = 'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300';
-const IDLE_CLS   = 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100';
+const ACTIVE_CLS =
+	'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300';
+const IDLE_CLS =
+	'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100';
 
 export default function Layout() {
 	const navigate = useNavigate();
@@ -63,20 +65,20 @@ export default function Layout() {
 			.toUpperCase() || 'AD';
 
 	// Role-based visibility
-	const showDashboard       = hasRole('admin', 'chief_laboratory');
-	const showApplications    = hasRole('admin', 'chief_laboratory', 'manager', 'buyro');
-	const showCertificates    = hasRole('admin', 'chief_laboratory', 'manager');
-	const showContacts        = hasRole('admin', 'chief_laboratory');
-	const showRegions         = hasRole('admin');
-	const showUsers           = hasRole('admin');
-	const showRejections      = hasRole('admin', 'chief_laboratory');
+	const showDashboard = hasRole('admin', 'chief_laboratory');
+	const showApplications = hasRole('admin', 'chief_laboratory', 'manager', 'buyro');
+	const showCertificates = hasRole('admin', 'chief_laboratory', 'manager');
+	const showContacts = hasRole('admin', 'chief_laboratory');
+	const showRegions = hasRole('admin');
+	const showUsers = hasRole('admin');
+	const showRejections = hasRole('admin', 'chief_laboratory');
 
 	const navItems = [
-		{ to: '/certificates',     icon: Award,  label: t.nav.certificates,    show: showCertificates },
+		{ to: '/certificates', icon: Award, label: t.nav.certificates, show: showCertificates },
 		{ to: '/rejection-letters', icon: FileX, label: 'Bekor qilish xatlari', show: showRejections },
-		{ to: '/contacts',         icon: Mail,   label: t.nav.contacts,         show: showContacts },
-		{ to: '/regions',          icon: MapPin, label: t.nav.regions,          show: showRegions },
-		{ to: '/users',            icon: Users,  label: t.nav.users,            show: showUsers },
+		{ to: '/contacts', icon: Mail, label: t.nav.contacts, show: showContacts },
+		{ to: '/regions', icon: MapPin, label: t.nav.regions, show: showRegions },
+		{ to: '/users', icon: Users, label: t.nav.users, show: showUsers },
 	].filter((i) => i.show);
 
 	/* auto-expand applications submenu */
@@ -249,7 +251,7 @@ export default function Layout() {
 								style={lang === l ? { background: 'hsl(205,45%,25%)' } : {}}
 								title={t.lang[l]}
 							>
-								{LANG_FLAGS[l]} {l.toUpperCase()}
+								{/* {LANG_FLAGS[l]} {l.toUpperCase()} */}
 							</button>
 						))}
 					</div>
