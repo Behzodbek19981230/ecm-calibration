@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FileText, User, Building2, Mail, MessageCircle, Clock, CheckCircle, Loader2, FileCheck, FlaskConical } from 'lucide-react';
-import api from '../lib/api';
-import type { Application } from '../lib/types';
+import { FileText, User, Building2, Mail, MessageCircle, Clock, CheckCircle, Loader2, FileCheck, FlaskConical, XCircle } from 'lucide-react';
+import { useApplications } from '../services/applicationService';
 import { useLang } from '../lib/LangContext';
+
 
 const STATUS_COLORS: Record<string, string> = {
   new:        'text-blue-600 bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-900',
@@ -11,14 +10,16 @@ const STATUS_COLORS: Record<string, string> = {
   acceptance: 'text-amber-600 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-900',
   laboratory: 'text-teal-600 bg-teal-50 dark:bg-teal-950/50 border-teal-200 dark:border-teal-900',
   completed:  'text-green-600 bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-900',
+  rejected:   'text-red-600 bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-900',
 };
 
 function StatusIcon({ status }: { status: string }) {
   if (status === 'new')        return <Clock size={11} />;
   if (status === 'contract')   return <FileCheck size={11} />;
-  if (status === 'acceptance') return <Loader2 size={11} className="animate-spin" />;
+  if (status === 'acceptance') return <Loader2 size={11} className='animate-spin' />;
   if (status === 'laboratory') return <FlaskConical size={11} />;
   if (status === 'completed')  return <CheckCircle size={11} />;
+  if (status === 'rejected')   return <XCircle size={11} />;
   return null;
 }
 
@@ -38,117 +39,101 @@ export default function Applications() {
   const a = t.applications;
 
   const activeStatus = searchParams.get('status') ?? '';
+  const { data: applications = [], isLoading } = useApplications(activeStatus || undefined);
 
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(true);
+  const allStatuses = ['new', 'contract', 'acceptance', 'laboratory', 'completed', 'rejected'];
 
-  useEffect(() => {
-    setLoading(true);
-    api.get('/applications').then((r) => setApplications(r.data)).finally(() => setLoading(false));
-  }, []);
-
-  const filtered = activeStatus
-    ? applications.filter((x) => x.status === activeStatus)
-    : applications;
-
-  const counts = ['new', 'contract', 'acceptance', 'laboratory', 'completed'].reduce<Record<string, number>>(
+  // "Hammasi" ko'rinishida sanalar frontendda hisoblanadi
+  const counts = allStatuses.reduce<Record<string, number>>(
     (acc, s) => { acc[s] = applications.filter((x) => x.status === s).length; return acc; },
     {},
   );
 
-  if (loading) return (
-    <div className="p-4 sm:p-6 lg:p-8 flex items-center justify-center h-64">
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'hsl(205,45%,35%)', borderTopColor: 'transparent' }} />
+  if (isLoading) return (
+    <div className='p-4 sm:p-6 lg:p-8 flex items-center justify-center h-64'>
+      <div className='w-6 h-6 border-2 border-t-transparent rounded-full animate-spin' style={{ borderColor: 'hsl(205,45%,35%)', borderTopColor: 'transparent' }} />
     </div>
   );
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100">
+    <div className='p-4 sm:p-6 lg:p-8'>
+      <div className='mb-5'>
+        <h1 className='text-xl font-bold text-gray-800 dark:text-slate-100'>
           {activeStatus ? t.status[activeStatus as keyof typeof t.status] : a.title}
         </h1>
-        <p className="text-sm text-gray-400 dark:text-slate-500 mt-0.5">
-          {filtered.length} {a.subtitle.toLowerCase()}
-        </p>
+        <p className='text-sm text-gray-400 dark:text-slate-500 mt-0.5'>{applications.length} {a.subtitle.toLowerCase()}</p>
       </div>
 
-      {/* Status summary chips */}
       {!activeStatus && (
-        <div className="flex flex-wrap gap-2 mb-5">
-          {(['new', 'contract', 'acceptance', 'laboratory', 'completed'] as const).map((s) => (
+        <div className='flex flex-wrap gap-2 mb-5'>
+          {(allStatuses as string[]).map((s) => (
             <button
               key={s}
               onClick={() => navigate(`/applications?status=${s}`)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all hover:shadow-sm ${STATUS_COLORS[s]}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all hover:shadow-sm ${STATUS_COLORS[s] ?? 'text-gray-500 bg-gray-50 border-gray-200'}`}
             >
               <StatusIcon status={s} />
-              {t.status[s]}
-              <span className="ml-0.5 font-bold">{counts[s]}</span>
+              {t.status[s as keyof typeof t.status] ?? s}
+              <span className='ml-0.5 font-bold'>{counts[s]}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Table */}
-      <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[520px]">
+      <div className='rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden'>
+        <div className='overflow-x-auto'>
+          <table className='w-full text-sm min-w-[520px]'>
             <thead>
-              <tr className="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
+              <tr className='bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700'>
                 {[a.cols.id, a.cols.applicant, a.cols.contact, a.cols.notify, a.cols.status].map((h) => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
+                  <th key={h} className='px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 whitespace-nowrap'>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-              {filtered.length === 0 ? (
+            <tbody className='divide-y divide-gray-100 dark:divide-slate-700'>
+              {applications.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-16 text-gray-400 dark:text-slate-500">
-                    <FileText size={36} className="mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">{a.noApps}</p>
+                  <td colSpan={5} className='text-center py-16 text-gray-400 dark:text-slate-500'>
+                    <FileText size={36} className='mx-auto mb-2 opacity-30' />
+                    <p className='text-sm'>{a.noApps}</p>
                   </td>
                 </tr>
-              ) : filtered.map((app) => (
+              ) : applications.map((app) => (
                 <tr
                   key={app.id}
                   onClick={() => navigate(`/applications/${app.id}`)}
-                  className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                  className='hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer'
                 >
-                  <td className="px-4 py-3.5 text-gray-400 dark:text-slate-500 text-xs font-mono">#{app.id}</td>
-
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-7 h-7 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                  <td className='px-4 py-3.5 text-gray-400 dark:text-slate-500 text-xs font-mono'>#{app.id}</td>
+                  <td className='px-4 py-3.5'>
+                    <div className='flex items-center gap-2'>
+                      <span className='w-7 h-7 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center shrink-0'>
                         {app.userType === 'individual'
-                          ? <User size={13} className="text-gray-500 dark:text-slate-400" />
-                          : <Building2 size={13} className="text-gray-500 dark:text-slate-400" />}
+                          ? <User size={13} className='text-gray-500 dark:text-slate-400' />
+                          : <Building2 size={13} className='text-gray-500 dark:text-slate-400' />}
                       </span>
                       <div>
-                        <p className="font-medium text-gray-800 dark:text-slate-100 text-xs leading-tight">
+                        <p className='font-medium text-gray-800 dark:text-slate-100 text-xs leading-tight'>
                           {app.userType === 'individual' ? (app.fullName || '—') : (app.orgName || '—')}
                         </p>
-                        <p className="text-xs text-gray-400 dark:text-slate-500">
+                        <p className='text-xs text-gray-400 dark:text-slate-500'>
                           {app.userType === 'individual' ? a.individual : a.legal}
                         </p>
                       </div>
                     </div>
                   </td>
-
-                  <td className="px-4 py-3.5">
-                    <p className="text-xs text-gray-700 dark:text-slate-300">{app.phone}</p>
-                    <p className="text-xs text-gray-400 dark:text-slate-500 truncate max-w-[140px]">{app.email}</p>
+                  <td className='px-4 py-3.5'>
+                    <p className='text-xs text-gray-700 dark:text-slate-300'>{app.phone}</p>
+                    <p className='text-xs text-gray-400 dark:text-slate-500 truncate max-w-[140px]'>{app.email}</p>
                   </td>
-
-                  <td className="px-4 py-3.5">
+                  <td className='px-4 py-3.5'>
                     <span className={`inline-flex items-center gap-1 text-xs font-medium ${app.notifyMethod === 'telegram' ? 'text-[#0088CC]' : 'text-gray-500 dark:text-slate-400'}`}>
                       {app.notifyMethod === 'telegram'
                         ? <><MessageCircle size={12} /> Telegram</>
                         : <><Mail size={12} /> Email</>}
                     </span>
                   </td>
-
-                  <td className="px-4 py-3.5">
+                  <td className='px-4 py-3.5'>
                     <StatusBadge
                       status={app.status}
                       label={t.status[app.status as keyof typeof t.status] ?? app.status}

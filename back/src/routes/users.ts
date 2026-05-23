@@ -12,8 +12,8 @@ const VALID_ROLES = ['admin', 'manager', 'buyro', 'chief_laboratory'] as const;
 const userCreateSchema = z.object({
   username: z.string().min(3).max(32),
   password: z.string().min(6),
-  fullName: z.string().default(''),
-  email: z.string().email().optional().default(''),
+  fullName: z.string().optional().default(''),
+  email: z.union([z.string().email(), z.literal('')]).optional().default(''),
   isActive: z.boolean().default(true),
   roles: z.array(z.enum(VALID_ROLES)).min(1),
 });
@@ -21,7 +21,7 @@ const userCreateSchema = z.object({
 const userUpdateSchema = z.object({
   password: z.string().min(6).optional(),
   fullName: z.string().optional(),
-  email: z.string().email().optional(),
+  email: z.union([z.string().email(), z.literal('')]).optional(),
   isActive: z.boolean().optional(),
   roles: z.array(z.enum(VALID_ROLES)).min(1).optional(),
 });

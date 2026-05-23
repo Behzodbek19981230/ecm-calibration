@@ -40,6 +40,7 @@ const uz = {
     acceptance: 'Qabul qilish',
     laboratory: 'Laboratoriya tekshiruvida',
     completed:  'Yakunlangan',
+    rejected:   'Rad etilgan',
   },
   applications: {
     title: 'Arizalar', subtitle: 'Kelgan arizalarni boshqarish',
@@ -140,6 +141,7 @@ const ru: typeof uz = {
     acceptance: 'Приёмка',
     laboratory: 'В лаборатории',
     completed:  'Завершено',
+    rejected:   'Отклонено',
   },
   applications: {
     title: 'Заявки', subtitle: 'Управление заявками',
@@ -240,6 +242,7 @@ const en: typeof uz = {
     acceptance: 'Acceptance',
     laboratory: 'In laboratory',
     completed:  'Completed',
+    rejected:   'Rejected',
   },
   applications: {
     title: 'Applications', subtitle: 'Manage incoming applications',

@@ -11,6 +11,7 @@ import Applications from './pages/Applications';
 import ApplicationDetail from './pages/ApplicationDetail';
 import Certificates from './pages/Certificates';
 import Users from './pages/Users';
+import RejectionLetters from './pages/RejectionLetters';
 import { isAuthenticated, hasRole } from './lib/auth';
 import { LangProvider } from './lib/LangContext';
 import { ThemeProvider } from './lib/ThemeContext';
@@ -50,6 +51,7 @@ export default function App() {
               <Route path="applications" element={<Applications />} />
               <Route path="applications/:id" element={<ApplicationDetail />} />
               <Route path="certificates" element={<PrivateRoute><Certificates /></PrivateRoute>} />
+              <Route path="rejection-letters" element={<PrivateRoute><RejectionLetters /></PrivateRoute>} />
               <Route
                 path="users"
                 element={

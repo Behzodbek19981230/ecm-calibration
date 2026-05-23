@@ -16,6 +16,7 @@ router.get('/dashboard', requireAuth, async (_req: AuthRequest, res: Response): 
     acceptance,
     laboratory,
     completed,
+    rejected,
     totalUsers,
     totalCerts,
     activeCerts,
@@ -27,6 +28,7 @@ router.get('/dashboard', requireAuth, async (_req: AuthRequest, res: Response): 
     prisma.application.count({ where: { status: 'acceptance' } }),
     prisma.application.count({ where: { status: 'laboratory' } }),
     prisma.application.count({ where: { status: 'completed' } }),
+    prisma.application.count({ where: { status: 'rejected' } }),
     prisma.user.count({ where: { isActive: true } }),
     prisma.certificate.count(),
     prisma.certificate.count({ where: { status: 'active' } }),
@@ -51,7 +53,7 @@ router.get('/dashboard', requireAuth, async (_req: AuthRequest, res: Response): 
   }
 
   res.json({
-    applications: { total, new: newApps, contract, acceptance, laboratory, completed, perMonth },
+    applications: { total, new: newApps, contract, acceptance, laboratory, completed, rejected, perMonth },
     users: { total: totalUsers },
     certificates: { total: totalCerts, active: activeCerts, revoked: totalCerts - activeCerts },
   });

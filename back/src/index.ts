@@ -11,6 +11,7 @@ import regionRoutes from './routes/regions';
 import userRoutes from './routes/users';
 import certificateRoutes from './routes/certificates';
 import statsRoutes from './routes/stats';
+import rejectionLetterRoutes from './routes/rejection-letters';
 import { initBot, stopBot } from './bot';
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use('/api/regions', regionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/rejection-letters', rejectionLetterRoutes);
 
 initBot();
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation, Link } from 'react-router-dom';
-import api from '../lib/api';
+import { useDashboardStats } from '../services/statsService';
 import {
 	LayoutDashboard,
 	Mail,
@@ -14,8 +14,9 @@ import {
 	Sun,
 	Moon,
 	ChevronDown,
+	FileX,
 } from 'lucide-react';
-import { getRoles, logout } from '../lib/auth';
+import { getRoles, hasRole, logout } from '../lib/auth';
 import { useLang } from '../lib/LangContext';
 import { useTheme } from '../lib/ThemeContext';
 import type { Lang } from '../lib/i18n';
@@ -23,7 +24,7 @@ import type { Lang } from '../lib/i18n';
 const LANG_FLAGS: Record<Lang, string> = { uz: '🇺🇿', ru: '🇷🇺', en: '🇬🇧' };
 const LANGS: Lang[] = ['uz', 'ru', 'en'];
 
-const APP_STATUSES = ['new', 'contract', 'acceptance', 'laboratory', 'completed'] as const;
+const APP_STATUSES = ['new', 'contract', 'acceptance', 'laboratory', 'completed', 'rejected'] as const;
 
 const STATUS_COLORS: Record<string, string> = {
 	new: 'bg-blue-500',
@@ -31,14 +32,21 @@ const STATUS_COLORS: Record<string, string> = {
 	acceptance: 'bg-amber-500',
 	laboratory: 'bg-teal-500',
 	completed: 'bg-green-500',
+	rejected: 'bg-red-500',
 };
+
+const ACTIVE_CLS = 'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300';
+const IDLE_CLS   = 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100';
 
 export default function Layout() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [open, setOpen] = useState(false);
 	const [appsOpen, setAppsOpen] = useState(false);
-	const [counts, setCounts] = useState<Record<string, number>>({});
+
+	const { data: statsData } = useDashboardStats();
+	const { perMonth: _pm, ...appCounts } = statsData?.applications ?? { perMonth: [] };
+	const counts = appCounts as Record<string, number>;
 	const { t, lang, setLang } = useLang();
 	const { theme, toggle: toggleTheme } = useTheme();
 
@@ -54,41 +62,39 @@ export default function Layout() {
 			.slice(0, 2)
 			.toUpperCase() || 'AD';
 
+	// Role-based visibility
+	const showDashboard       = hasRole('admin', 'chief_laboratory');
+	const showApplications    = hasRole('admin', 'chief_laboratory', 'manager', 'buyro');
+	const showCertificates    = hasRole('admin', 'chief_laboratory', 'manager');
+	const showContacts        = hasRole('admin', 'chief_laboratory');
+	const showRegions         = hasRole('admin');
+	const showUsers           = hasRole('admin');
+	const showRejections      = hasRole('admin', 'chief_laboratory');
+
+	const navItems = [
+		{ to: '/certificates',     icon: Award,  label: t.nav.certificates,    show: showCertificates },
+		{ to: '/rejection-letters', icon: FileX, label: 'Bekor qilish xatlari', show: showRejections },
+		{ to: '/contacts',         icon: Mail,   label: t.nav.contacts,         show: showContacts },
+		{ to: '/regions',          icon: MapPin, label: t.nav.regions,          show: showRegions },
+		{ to: '/users',            icon: Users,  label: t.nav.users,            show: showUsers },
+	].filter((i) => i.show);
+
 	/* auto-expand applications submenu */
 	useEffect(() => {
 		if (location.pathname.startsWith('/applications')) setAppsOpen(true);
 	}, [location.pathname]);
 
-	/* fetch application counts */
-	useEffect(() => {
-		api.get('/stats/dashboard')
-			.then((r) => setCounts(r.data.applications))
-			.catch(() => {});
-	}, [location.pathname]);
-
 	const onApps = location.pathname.startsWith('/applications');
-
-	/* active sub-status */
 	const activeStatus = onApps ? (new URLSearchParams(location.search).get('status') ?? '') : '';
-
-	const topNavItems = [
-		// { to: '/dashboard',    icon: LayoutDashboard, label: t.nav.dashboard },
-		{ to: '/certificates', icon: Award, label: t.nav.certificates },
-		{ to: '/contacts', icon: Mail, label: t.nav.contacts },
-		{ to: '/regions', icon: MapPin, label: t.nav.regions },
-	];
-
-	const adminItems = roles.includes('admin')
-		? [...topNavItems, { to: '/users', icon: Users, label: t.nav.users }]
-		: topNavItems;
 
 	const pageTitle = (() => {
 		if (location.pathname.startsWith('/applications')) {
 			if (activeStatus) return t.status[activeStatus as keyof typeof t.status] ?? t.nav.applications;
 			return t.nav.applications;
 		}
+		if (location.pathname.startsWith('/dashboard')) return t.nav.dashboard;
 		return (
-			adminItems.find((n) => location.pathname.startsWith(n.to))?.label ??
+			navItems.find((n) => location.pathname.startsWith(n.to))?.label ??
 			(location.pathname.startsWith('/blog') ? t.nav.blog : 'ECM Admin')
 		);
 	})();
@@ -144,95 +150,81 @@ export default function Layout() {
 						{t.nav.menu}
 					</p>
 					<div className='space-y-0.5'>
-						{/* Dashboard */}
-						<NavLink
-							to='/dashboard'
-							onClick={() => setOpen(false)}
-							className={({ isActive }) =>
-								`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-									isActive
-										? 'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300'
-										: 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
-								}`
-							}
-						>
-							<LayoutDashboard size={17} />
-							{t.nav.dashboard}
-						</NavLink>
-
-						{/* ── Arizalar accordion ── */}
-						<div>
-							{/* Parent button */}
-							<button
-								onClick={() => {
-									setAppsOpen((p) => !p);
-									if (!onApps) navigate('/applications');
-								}}
-								className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-									onApps
-										? 'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300'
-										: 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
-								}`}
+						{/* Dashboard — admin & chief_laboratory only */}
+						{showDashboard && (
+							<NavLink
+								to='/dashboard'
+								onClick={() => setOpen(false)}
+								className={({ isActive }) =>
+									`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive ? ACTIVE_CLS : IDLE_CLS}`
+								}
 							>
-								<ClipboardList size={17} />
-								<span className='flex-1 text-left'>{t.nav.applications}</span>
-								{counts.total > 0 && (
-									<span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 dark:bg-red-600 text-white  min-w-[18px] text-center'>
-										{counts.total}
-									</span>
+								<LayoutDashboard size={17} />
+								{t.nav.dashboard}
+							</NavLink>
+						)}
+
+						{/* Arizalar accordion — all roles */}
+						{showApplications && (
+							<div>
+								<button
+									onClick={() => {
+										setAppsOpen((p) => !p);
+										if (!onApps) navigate('/applications');
+									}}
+									className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${onApps ? ACTIVE_CLS : IDLE_CLS}`}
+								>
+									<ClipboardList size={17} />
+									<span className='flex-1 text-left'>{t.nav.applications}</span>
+									{counts.total > 0 && (
+										<span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white min-w-[18px] text-center'>
+											{counts.total}
+										</span>
+									)}
+									<ChevronDown
+										size={13}
+										className={`transition-transform duration-200 shrink-0 ${appsOpen ? 'rotate-180' : ''} opacity-50`}
+									/>
+								</button>
+
+								{appsOpen && (
+									<div className='mt-0.5 ml-3 pl-3 border-l-2 border-gray-100 dark:border-slate-700 space-y-0.5'>
+										{APP_STATUSES.map((status) => {
+											const isActive = activeStatus === status;
+											const label = t.status[status as keyof typeof t.status];
+											const count = (counts[status] as number | undefined) ?? 0;
+											return (
+												<Link
+													key={status}
+													to={`/applications?status=${status}`}
+													onClick={() => setOpen(false)}
+													className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${isActive ? ACTIVE_CLS : IDLE_CLS}`}
+												>
+													<span
+														className={`w-1.5 h-1.5 rounded-full shrink-0 ${count > 0 ? STATUS_COLORS[status] : 'bg-gray-300 dark:bg-slate-600'}`}
+													/>
+													<span className='flex-1 truncate'>{label}</span>
+													{count > 0 && (
+														<span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white min-w-[18px] text-center'>
+															{count}
+														</span>
+													)}
+												</Link>
+											);
+										})}
+									</div>
 								)}
-								<ChevronDown
-									size={13}
-									className={`transition-transform duration-200 shrink-0 ${appsOpen ? 'rotate-180' : ''} opacity-50`}
-								/>
-							</button>
+							</div>
+						)}
 
-							{/* Sub-items */}
-							{appsOpen && (
-								<div className='mt-0.5 ml-3 pl-3 border-l-2 border-gray-100 dark:border-slate-700 space-y-0.5'>
-									{APP_STATUSES.map((status) => {
-										const isActive = activeStatus === status;
-										const label = t.status[status as keyof typeof t.status];
-										const count = (counts[status] as number | undefined) ?? 0;
-										return (
-											<Link
-												key={status}
-												to={`/applications?status=${status}`}
-												onClick={() => setOpen(false)}
-												className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
-													isActive
-														? 'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300'
-														: 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
-												}`}
-											>
-												<span
-													className={`w-1.5 h-1.5 rounded-full shrink-0 ${count > 0 ? STATUS_COLORS[status] : 'bg-gray-300 dark:bg-slate-600'}`}
-												/>
-												<span className='flex-1 truncate'>{label}</span>
-												{count > 0 && (
-													<span className='text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 dark:bg-red-600 text-white  min-w-[18px] text-center'>
-														{count}
-													</span>
-												)}
-											</Link>
-										);
-									})}
-								</div>
-							)}
-						</div>
-
-						{/* Other nav items */}
-						{adminItems.map(({ to, icon: Icon, label }) => (
+						{/* Remaining nav items filtered by role */}
+						{navItems.map(({ to, icon: Icon, label }) => (
 							<NavLink
 								key={to}
 								to={to}
 								onClick={() => setOpen(false)}
 								className={({ isActive }) =>
-									`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-										isActive
-											? 'font-semibold bg-[hsl(205_45%_25%/0.09)] text-[hsl(205,45%,20%)] dark:bg-sky-400/10 dark:text-sky-300'
-											: 'text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-800 dark:hover:text-slate-100'
-									}`
+									`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive ? ACTIVE_CLS : IDLE_CLS}`
 								}
 							>
 								<Icon size={17} />

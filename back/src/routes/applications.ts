@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { sendCertificate } from '../bot';
-import { sendApplicationNotification } from '../email';
+import { sendApplicationNotification, sendRejectionNotification } from '../email';
 import { z } from 'zod';
 
 const router = Router();
@@ -46,7 +46,7 @@ const applicationSchema = z.object({
   }, z.array(z.any()).default([])),
 });
 
-const VALID_STATUSES = ['new', 'contract', 'acceptance', 'laboratory', 'completed'] as const;
+const VALID_STATUSES = ['new', 'contract', 'acceptance', 'laboratory', 'completed', 'rejected'] as const;
 type AppStatus = typeof VALID_STATUSES[number];
 
 const STATUS_LABELS: Record<AppStatus, string> = {
@@ -55,6 +55,7 @@ const STATUS_LABELS: Record<AppStatus, string> = {
   acceptance: 'Qabul qilish',
   laboratory: 'Laboratoriya tekshiruvida',
   completed:  'Yakunlangan',
+  rejected:   'Rad etilgan',
 };
 
 // Public: submit application (multipart/form-data)
@@ -79,9 +80,12 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
   res.status(201).json(application);
 });
 
-// Admin: list all
-router.get('/', requireAuth, async (_req: AuthRequest, res: Response): Promise<void> => {
+// Admin: list all (optional ?status= filter)
+router.get('/', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { status } = req.query as { status?: string };
+  const where = status && (VALID_STATUSES as readonly string[]).includes(status) ? { status } : {};
   const applications = await prisma.application.findMany({
+    where,
     orderBy: { createdAt: 'desc' },
     include: { assignedTo: { include: { roles: true } } },
   });
@@ -153,6 +157,111 @@ router.post('/:id/notify', requireAuth, async (req: AuthRequest, res: Response):
   } else {
     res.json({ sent: false, note: 'Bildirishnoma usuli aniqlanmadi' });
   }
+});
+
+// Chief laboratory: accept new application → move to contract
+router.post('/:id/accept', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userRoles = req.userRoles ?? [];
+  if (!userRoles.includes('chief_laboratory') && !userRoles.includes('admin')) {
+    res.status(403).json({ error: 'Forbidden' });
+    return;
+  }
+  const app = await prisma.application.findUnique({ where: { id: Number(req.params.id) } });
+  if (!app) { res.status(404).json({ error: 'Not found' }); return; }
+  if (app.status !== 'new') {
+    res.status(400).json({ error: 'Faqat "yangi" statusdagi arizalarni qabul qilish mumkin' });
+    return;
+  }
+  const updated = await prisma.application.update({
+    where: { id: app.id },
+    data: { status: 'contract' },
+  });
+  res.json({ ...updated, devices: JSON.parse(updated.devices) });
+});
+
+// Chief laboratory: reject new application → create rejection letter + notify
+router.post('/:id/reject', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const userRoles = req.userRoles ?? [];
+  if (!userRoles.includes('chief_laboratory') && !userRoles.includes('admin')) {
+    res.status(403).json({ error: 'Forbidden' });
+    return;
+  }
+
+  const { reason } = req.body as { reason?: string };
+  if (!reason?.trim()) {
+    res.status(400).json({ error: 'Rad etish sababi (reason) kiritilishi shart' });
+    return;
+  }
+
+  const app = await prisma.application.findUnique({ where: { id: Number(req.params.id) } });
+  if (!app) { res.status(404).json({ error: 'Not found' }); return; }
+  if (app.status !== 'new') {
+    res.status(400).json({ error: 'Faqat "yangi" statusdagi arizalarni rad etish mumkin' });
+    return;
+  }
+
+  const applicantName = app.userType === 'individual'
+    ? (app.fullName ?? app.email)
+    : (app.orgName ?? app.email);
+
+  const rejectedAt = new Date().toLocaleDateString('uz-UZ', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
+  const createdAtStr = new Date(app.createdAt).toLocaleDateString('uz-UZ', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
+
+  const letterText = [
+    'BEKOR QILISH XATI',
+    '',
+    `Ariza №${app.id}`,
+    `Sana: ${rejectedAt}`,
+    '',
+    `Hurmatli ${applicantName},`,
+    '',
+    `Siz ${createdAtStr} sanasida ECM Kalibrlash MChJga №${app.id} raqamli kalibrlash arizasi taqdim etdingiz.`,
+    '',
+    'Ushbu ariza ko\'rib chiqildi va quyidagi sabab bilan qabul qilinmadi:',
+    '',
+    reason.trim(),
+    '',
+    'Boshqa savollar bo\'lsa, iltimos bizning markaz bilan bog\'laning.',
+    '',
+    'Hurmat bilan,',
+    'ECM Kalibrlash MChJ',
+    'Birinchi laboratoriya boshlig\'i',
+    `Sana: ${rejectedAt}`,
+  ].join('\n');
+
+  await prisma.application.update({ where: { id: app.id }, data: { status: 'rejected' } });
+
+  await (prisma as any).rejectionLetter.create({
+    data: {
+      applicationId: app.id,
+      reason: reason.trim(),
+      letterText,
+      createdById: req.userId!,
+    },
+  });
+
+  // Send notification to applicant
+  try {
+    if (app.notifyMethod === 'telegram' && app.telegramChatId) {
+      const tgText = `❌ <b>Ariza №${app.id} rad etildi</b>\n\n${letterText.replace(/\n/g, '\n')}`;
+      await sendCertificate(app.telegramChatId, tgText);
+    } else if (app.notifyMethod === 'email' && app.email) {
+      await sendRejectionNotification({
+        to: app.email,
+        applicantName,
+        applicationId: app.id,
+        letterText,
+      });
+    }
+  } catch (_e) {
+    // Bildirishnoma yuborilmasa ham jarayon to'xtatilmaydi
+  }
+
+  res.json({ success: true, letterText });
 });
 
 export default router;

@@ -16,8 +16,9 @@ model User {
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
   roles        UserRole[]
-  certificates Certificate[] @relation("IssuedBy")
-  applications Application[] @relation("AssignedTo")
+  certificates      Certificate[]    @relation("IssuedBy")
+  applications      Application[]    @relation("AssignedTo")
+  rejectionLetters  RejectionLetter[] @relation("RejectedBy")
 }
 
 model UserRole {
@@ -52,22 +53,34 @@ model TelegramConnect {
 }
 
 model Application {
-  id             Int          @id @default(autoincrement())
-  userType       String
-  fullName       String?
-  orgName        String?
-  phone          String
-  email          String
-  branchRequest  Boolean      @default(false)
-  notifyMethod   String       @default("email")
-  telegramChatId String?
-  devices        String       @default("[]")
-  filePath       String?
-  status         String       @default("new")
-  assignedToId   Int?
-  assignedTo     User?        @relation("AssignedTo", fields: [assignedToId], references: [id])
-  certificate    Certificate?
-  createdAt      DateTime     @default(now())
+  id               Int               @id @default(autoincrement())
+  userType         String
+  fullName         String?
+  orgName          String?
+  phone            String
+  email            String
+  branchRequest    Boolean           @default(false)
+  notifyMethod     String            @default("email")
+  telegramChatId   String?
+  devices          String            @default("[]")
+  filePath         String?
+  status           String            @default("new")
+  assignedToId     Int?
+  assignedTo       User?             @relation("AssignedTo", fields: [assignedToId], references: [id])
+  certificate      Certificate?
+  rejectionLetter  RejectionLetter?
+  createdAt        DateTime          @default(now())
+}
+
+model RejectionLetter {
+  id            Int         @id @default(autoincrement())
+  applicationId Int         @unique
+  application   Application @relation(fields: [applicationId], references: [id])
+  reason        String
+  letterText    String
+  createdById   Int
+  createdBy     User        @relation("RejectedBy", fields: [createdById], references: [id])
+  createdAt     DateTime    @default(now())
 }
 
 model Certificate {
