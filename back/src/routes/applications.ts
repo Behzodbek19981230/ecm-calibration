@@ -213,7 +213,7 @@ router.post('/:id/accept-instruments', requireAuth, async (req: AuthRequest, res
 				`O'lchov vositalaringiz qabul qilindi va laboratoriya tekshiruviga topshirildi.`,
 				`Tekshiruv natijalari tayyor bo'lgach, siz bilan bog'lanamiz.`,
 				``,
-				`ECM Kalibrlash MChJ · ${date}`,
+				`ECM CALIBRATION MChJ · ${date}`,
 			].join('\n');
 			await sendCertificate(app.telegramChatId, text);
 		} else if (app.notifyMethod === 'email' && app.email) {
@@ -329,7 +329,7 @@ router.post('/:id/accept', requireAuth, async (req: AuthRequest, res: Response):
 				`Sizning ariza №${app.id} ko'rib chiqildi va laboratoriya tomonidan qabul qilindi.`,
 				`Tez orada shartnoma tuzish bosqichiga o'tiladi. Mutaxassislarimiz siz bilan bog'lanadi.`,
 				``,
-				`ECM Kalibrlash MChJ`,
+				`ECM CALIBRATION MChJ`,
 			].join('\n');
 			await sendCertificate(app.telegramChatId, text);
 		} else if (app.notifyMethod === 'email' && app.email) {
@@ -343,65 +343,76 @@ router.post('/:id/accept', requireAuth, async (req: AuthRequest, res: Response):
 });
 
 // Lab: attach certificate to a specific device in the application
-router.post('/:id/attach-certificate', requireAuth, upload.single('file'), async (req: AuthRequest, res: Response): Promise<void> => {
-	const userRoles = req.userRoles ?? [];
-	if (!userRoles.includes('chief_laboratory') && !userRoles.includes('admin') && !userRoles.includes('manager')) {
-		res.status(403).json({ error: 'Forbidden' });
-		return;
-	}
+router.post(
+	'/:id/attach-certificate',
+	requireAuth,
+	upload.single('file'),
+	async (req: AuthRequest, res: Response): Promise<void> => {
+		const userRoles = req.userRoles ?? [];
+		if (!userRoles.includes('chief_laboratory') && !userRoles.includes('admin') && !userRoles.includes('manager')) {
+			res.status(403).json({ error: 'Forbidden' });
+			return;
+		}
 
-	const { deviceIndex, url } = req.body as { deviceIndex?: string; url?: string };
-	if (deviceIndex === undefined) {
-		res.status(400).json({ error: 'deviceIndex majburiy' });
-		return;
-	}
-	if (!url?.trim() && !req.file) {
-		res.status(400).json({ error: 'URL yoki fayl kiritilishi shart' });
-		return;
-	}
+		const { deviceIndex, url } = req.body as { deviceIndex?: string; url?: string };
+		if (deviceIndex === undefined) {
+			res.status(400).json({ error: 'deviceIndex majburiy' });
+			return;
+		}
+		if (!url?.trim() && !req.file) {
+			res.status(400).json({ error: 'URL yoki fayl kiritilishi shart' });
+			return;
+		}
 
-	const appId = Number(req.params.id);
-	const appWithCerts = await prisma.application.findUnique({
-		where: { id: appId },
-		include: { certificates: true },
-	});
-	if (!appWithCerts) { res.status(404).json({ error: 'Not found' }); return; }
-	if (appWithCerts.status !== 'laboratory') {
-		res.status(400).json({ error: 'Faqat laboratoriya bosqichidagi arizalar uchun' });
-		return;
-	}
+		const appId = Number(req.params.id);
+		const appWithCerts = await prisma.application.findUnique({
+			where: { id: appId },
+			include: { certificates: true },
+		});
+		if (!appWithCerts) {
+			res.status(404).json({ error: 'Not found' });
+			return;
+		}
+		if (appWithCerts.status !== 'laboratory') {
+			res.status(400).json({ error: 'Faqat laboratoriya bosqichidagi arizalar uchun' });
+			return;
+		}
 
-	const devices: { type: string; serialNumber?: string; measureRange?: string; accuracyClass?: string }[] =
-		JSON.parse(appWithCerts.devices);
-	const idx = Number(deviceIndex);
-	const device = devices[idx];
-	if (!device) { res.status(400).json({ error: 'Qurilma topilmadi' }); return; }
+		const devices: { type: string; serialNumber?: string; measureRange?: string; accuracyClass?: string }[] =
+			JSON.parse(appWithCerts.devices);
+		const idx = Number(deviceIndex);
+		const device = devices[idx];
+		if (!device) {
+			res.status(400).json({ error: 'Qurilma topilmadi' });
+			return;
+		}
 
-	const alreadyAttached = appWithCerts.certificates.some((c) => c.deviceIndex === idx);
-	if (alreadyAttached) {
-		res.status(409).json({ error: 'Bu qurilma uchun sertifikat allaqachon mavjud' });
-		return;
-	}
+		const alreadyAttached = appWithCerts.certificates.some((c) => c.deviceIndex === idx);
+		if (alreadyAttached) {
+			res.status(409).json({ error: 'Bu qurilma uchun sertifikat allaqachon mavjud' });
+			return;
+		}
 
-	const year = new Date().getFullYear();
-	const start = new Date(`${year}-01-01`);
-	const count = await prisma.certificate.count({ where: { createdAt: { gte: start } } });
-	const certNumber = `ECM-${year}-${String(count + 1).padStart(4, '0')}`;
+		const year = new Date().getFullYear();
+		const start = new Date(`${year}-01-01`);
+		const count = await prisma.certificate.count({ where: { createdAt: { gte: start } } });
+		const certNumber = `ECM-${year}-${String(count + 1).padStart(4, '0')}`;
 
-	const cert = await prisma.certificate.create({
-		data: {
-			certNumber,
-			applicationId: appId,
-			issuedById: req.userId!,
-			deviceName: device.type,
-			serialNumber: device.serialNumber ?? null,
-			deviceIndex: idx,
-			url: url?.trim() || null,
-			filePath: req.file ? req.file.filename : null,
-		},
-	});
-	res.status(201).json(cert);
-});
+		const cert = await prisma.certificate.create({
+			data: {
+				certNumber,
+				applicationId: appId,
+				issuedById: req.userId!,
+				deviceName: device.type,
+				serialNumber: device.serialNumber ?? null,
+				deviceIndex: idx,
+				url: url?.trim() || null,
+				filePath: req.file ? req.file.filename : null,
+			},
+		});
+		res.status(201).json(cert);
+	},
+);
 
 // Lab: mark application as completed + notify applicant
 router.post('/:id/complete', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
@@ -415,7 +426,10 @@ router.post('/:id/complete', requireAuth, async (req: AuthRequest, res: Response
 		where: { id: Number(req.params.id) },
 		include: { certificates: true },
 	});
-	if (!appWithCerts) { res.status(404).json({ error: 'Not found' }); return; }
+	if (!appWithCerts) {
+		res.status(404).json({ error: 'Not found' });
+		return;
+	}
 	if (appWithCerts.status !== 'laboratory') {
 		res.status(400).json({ error: 'Faqat laboratoriya bosqichida yakunlash mumkin' });
 		return;
@@ -426,9 +440,10 @@ router.post('/:id/complete', requireAuth, async (req: AuthRequest, res: Response
 		data: { status: 'completed' },
 	});
 
-	const applicantName = appWithCerts.userType === 'individual'
-		? (appWithCerts.fullName ?? appWithCerts.email)
-		: (appWithCerts.orgName ?? appWithCerts.email);
+	const applicantName =
+		appWithCerts.userType === 'individual'
+			? (appWithCerts.fullName ?? appWithCerts.email)
+			: (appWithCerts.orgName ?? appWithCerts.email);
 
 	const appBaseUrl = process.env.APP_URL || 'http://localhost:5000';
 	const certs = appWithCerts.certificates;
@@ -458,7 +473,7 @@ router.post('/:id/complete', requireAuth, async (req: AuthRequest, res: Response
 				...certLines,
 				``,
 				`Savollar uchun: +998 50 303 88 08`,
-				`ECM Kalibrlash MChJ`,
+				`ECM CALIBRATION MChJ`,
 			].join('\n');
 			await sendCertificate(appWithCerts.telegramChatId, text);
 		} else if (appWithCerts.notifyMethod === 'email' && appWithCerts.email) {
@@ -526,7 +541,7 @@ router.post('/:id/reject', requireAuth, async (req: AuthRequest, res: Response):
 		'',
 		`Hurmatli ${applicantName},`,
 		'',
-		`Siz ${createdAtStr} sanasida ECM Kalibrlash MChJga №${app.id} raqamli kalibrlash arizasi taqdim etdingiz.`,
+		`Siz ${createdAtStr} sanasida ECM CALIBRATION MChJga №${app.id} raqamli kalibrlash arizasi taqdim etdingiz.`,
 		'',
 		"Ushbu ariza ko'rib chiqildi va quyidagi sabab bilan qabul qilinmadi:",
 		'',
@@ -535,7 +550,7 @@ router.post('/:id/reject', requireAuth, async (req: AuthRequest, res: Response):
 		"Boshqa savollar bo'lsa, iltimos bizning markaz bilan bog'laning.",
 		'',
 		'Hurmat bilan,',
-		'ECM Kalibrlash MChJ',
+		'ECM CALIBRATION MChJ',
 		"Birinchi laboratoriya boshlig'i",
 		`Sana: ${rejectedAt}`,
 	].join('\n');

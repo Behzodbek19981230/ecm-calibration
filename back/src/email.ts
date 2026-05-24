@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-const FROM = 'ECM Kalibrlash <ecm.calibration.llc@gmail.com>';
+const FROM = 'ECM CALIBRATION <ecm.calibration.llc@gmail.com>';
 const COMPANY_EMAIL = 'ecm.calibration.llc@gmail.com';
 
 function createTransport() {
@@ -36,7 +36,7 @@ export async function sendApplicationConfirmation(params: {
         <p>Tez orada mutaxassislarimiz siz bilan bog'lanadi.</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
         <p style="font-size:13px;color:#6b7280">
-          ECM Kalibrlash — kalibrlash va sertifikatlash xizmatlari
+          ECM CALIBRATION — kalibrlash va sertifikatlash xizmatlari
         </p>
       </div>
     `,
@@ -65,7 +65,7 @@ export async function sendInstrumentsAcceptedEmail(params: {
         <p>Tekshiruv natijalari tayyor bo'lgach, siz bilan bog'lanamiz.</p>
         <p style="font-size:13px;color:#6b7280">Sana: ${date}</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
-        <p style="font-size:13px;color:#6b7280">ECM Kalibrlash — kalibrlash va sertifikatlash xizmatlari</p>
+        <p style="font-size:13px;color:#6b7280">ECM CALIBRATION — kalibrlash va sertifikatlash xizmatlari</p>
       </div>
     `,
 	});
@@ -83,7 +83,7 @@ export async function sendContractEmail(params: {
 	await transporter.sendMail({
 		from: FROM,
 		to: params.to,
-		subject: `Shartnoma №${params.applicationId} — ECM Kalibrlash`,
+		subject: `Shartnoma №${params.applicationId} — ECM CALIBRATION`,
 		html: `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#1a1a2e">
         <h2 style="color:#1b4060">📄 Shartnoma / Договор №${params.applicationId}</h2>
@@ -116,7 +116,7 @@ export async function sendContractEmail(params: {
         <p style="font-size:14px">Shartnomani ko'rib chiqing va to'lovni yuqoridagi rekvizitlar bo'yicha amalga oshiring. Savollar bo'lsa, biz bilan bog'laning: <strong>+998 50 303 88 08</strong></p>
         <p style="font-size:13px;color:#6b7280">Sana / Дата: ${date}</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
-        <p style="font-size:13px;color:#6b7280">ECM Kalibrlash — kalibrlash va sertifikatlash xizmatlari</p>
+        <p style="font-size:13px;color:#6b7280">ECM CALIBRATION — kalibrlash va sertifikatlash xizmatlari</p>
       </div>
     `,
 	});
@@ -138,7 +138,7 @@ export async function sendRejectionNotification(params: {
 	await transporter.sendMail({
 		from: FROM,
 		to: params.to,
-		subject: `Ariza №${params.applicationId} rad etildi — ECM Kalibrlash`,
+		subject: `Ariza №${params.applicationId} rad etildi — ECM CALIBRATION`,
 		html: `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a2e">
         <h2 style="color:#b91c1c">❌ Ariza rad etildi</h2>
@@ -148,7 +148,7 @@ export async function sendRejectionNotification(params: {
         </div>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
         <p style="font-size:13px;color:#6b7280">
-          ECM Kalibrlash — kalibrlash va sertifikatlash xizmatlari
+          ECM CALIBRATION — kalibrlash va sertifikatlash xizmatlari
         </p>
       </div>
     `,
@@ -217,7 +217,7 @@ export async function sendCompletionEmail(params: {
         </p>
         <p style="font-size:13px;color:#6b7280">Sana: ${date}</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
-        <p style="font-size:13px;color:#6b7280">ECM Kalibrlash — kalibrlash va sertifikatlash xizmatlari</p>
+        <p style="font-size:13px;color:#6b7280">ECM CALIBRATION — kalibrlash va sertifikatlash xizmatlari</p>
       </div>
     `,
 	});
@@ -246,7 +246,7 @@ export async function sendApplicationNotification(params: {
         ${body}
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
         <p style="font-size:13px;color:#6b7280">
-          ECM Kalibrlash — kalibrlash va sertifikatlash xizmatlari
+          ECM CALIBRATION — kalibrlash va sertifikatlash xizmatlari
         </p>
       </div>
     `,
