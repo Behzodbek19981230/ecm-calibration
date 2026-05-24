@@ -75,7 +75,7 @@ export default function Layout() {
 
 	const navItems = [
 		{ to: '/certificates', icon: Award, label: t.nav.certificates, show: showCertificates },
-		{ to: '/rejection-letters', icon: FileX, label: 'Bekor qilish xatlari', show: showRejections },
+		{ to: '/rejection-letters', icon: FileX, label: t.nav.rejectionLetters, show: showRejections },
 		{ to: '/contacts', icon: Mail, label: t.nav.contacts, show: showContacts },
 		{ to: '/regions', icon: MapPin, label: t.nav.regions, show: showRegions },
 		{ to: '/users', icon: Users, label: t.nav.users, show: showUsers },

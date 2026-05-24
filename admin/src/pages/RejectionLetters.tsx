@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { FileX, User, Building2, X, ClipboardCopy, Check, ExternalLink } from 'lucide-react';
 import api from '../lib/api';
+import { useLang } from '../lib/LangContext';
 
 interface RejectionLetter {
   id: number;
@@ -27,6 +28,8 @@ interface RejectionLetter {
 }
 
 function LetterModal({ letter, onClose }: { letter: RejectionLetter; onClose: () => void }) {
+  const { t } = useLang();
+  const r = t.rejectionLetters;
   const [copied, setCopied] = useState(false);
 
   function copyText() {
@@ -46,8 +49,8 @@ function LetterModal({ letter, onClose }: { letter: RejectionLetter; onClose: ()
           <div className="flex items-center gap-2">
             <FileX size={18} className="text-red-500" />
             <div>
-              <h2 className="text-sm font-semibold text-gray-800 dark:text-slate-100">Bekor qilish xati</h2>
-              <p className="text-xs text-gray-400 dark:text-slate-500">Ariza №{letter.applicationId} — {applicantName}</p>
+              <h2 className="text-sm font-semibold text-gray-800 dark:text-slate-100">{r.letterTitle}</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-500">{t.applications.appNum}{letter.applicationId} — {applicantName}</p>
             </div>
           </div>
           <button
@@ -68,7 +71,7 @@ function LetterModal({ letter, onClose }: { letter: RejectionLetter; onClose: ()
 
         <div className="px-5 pb-5 flex items-center justify-between shrink-0 border-t border-gray-100 dark:border-slate-700 pt-4">
           <p className="text-xs text-gray-400 dark:text-slate-500">
-            Shakllangan: {new Date(letter.createdAt).toLocaleString('uz-UZ')}
+            {r.generatedAt}: {new Date(letter.createdAt).toLocaleString('uz-UZ')}
             {letter.createdBy?.fullName && ` · ${letter.createdBy.fullName}`}
           </p>
           <button
@@ -76,7 +79,7 @@ function LetterModal({ letter, onClose }: { letter: RejectionLetter; onClose: ()
             className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
           >
             {copied ? <Check size={14} className="text-green-500" /> : <ClipboardCopy size={14} />}
-            {copied ? 'Nusxalandi!' : 'Nusxalash'}
+            {copied ? r.copied : r.copy}
           </button>
         </div>
       </div>
@@ -86,11 +89,13 @@ function LetterModal({ letter, onClose }: { letter: RejectionLetter; onClose: ()
 
 export default function RejectionLetters() {
   const navigate = useNavigate();
+  const { t } = useLang();
+  const r = t.rejectionLetters;
   const [selected, setSelected] = useState<RejectionLetter | null>(null);
 
   const { data: letters = [], isLoading } = useQuery<RejectionLetter[]>({
     queryKey: ['rejection-letters'],
-    queryFn: () => api.get('/rejection-letters').then((r) => r.data),
+    queryFn: () => api.get('/rejection-letters').then((res) => res.data),
   });
 
   if (isLoading) return (
@@ -107,9 +112,9 @@ export default function RejectionLetters() {
         <div className="mb-5">
           <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
             <FileX size={20} className="text-red-500" />
-            Bekor qilish xatlari
+            {r.title}
           </h1>
-          <p className="text-sm text-gray-400 dark:text-slate-500 mt-0.5">{letters.length} ta xat</p>
+          <p className="text-sm text-gray-400 dark:text-slate-500 mt-0.5">{letters.length} {r.subtitle}</p>
         </div>
 
         <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden">
@@ -117,7 +122,7 @@ export default function RejectionLetters() {
             <table className="w-full text-sm min-w-[580px]">
               <thead>
                 <tr className="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
-                  {['№', 'Ariza', 'Arizachi', 'Sabab', 'Sana', 'Amallar'].map((h) => (
+                  {[r.cols.num, r.cols.app, t.applications.cols.applicant, r.cols.reason, t.contacts.cols.date, t.common.actions].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -127,7 +132,7 @@ export default function RejectionLetters() {
                   <tr>
                     <td colSpan={6} className="text-center py-16 text-gray-400 dark:text-slate-500">
                       <FileX size={36} className="mx-auto mb-2 opacity-30" />
-                      <p className="text-sm">Hozircha bekor qilish xatlari yo'q</p>
+                      <p className="text-sm">{r.empty}</p>
                     </td>
                   </tr>
                 ) : letters.map((letter) => {
@@ -172,7 +177,7 @@ export default function RejectionLetters() {
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 transition-colors"
                         >
                           <FileX size={12} />
-                          Ko'rish
+                          {t.common.view}
                         </button>
                       </td>
                     </tr>

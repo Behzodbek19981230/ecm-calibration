@@ -4,13 +4,16 @@ import { hasRole } from '../lib/auth';
 import type { Application } from '../lib/types';
 import { useLang } from '../lib/LangContext';
 
+const LOCALE_MAP: Record<string, string> = { uz: 'uz-UZ', ru: 'ru-RU', en: 'en-US' };
+
 function applicantName(app: Application) {
   return app.userType === 'individual' ? (app.fullName ?? app.email) : (app.orgName ?? app.email);
 }
 
 export default function Certificates() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const c = t.certificates;
+  const locale = LOCALE_MAP[lang] ?? 'uz-UZ';
   const canManage = hasRole('admin', 'manager');
 
   const { data: certs = [], isLoading } = useCertificates();
@@ -47,7 +50,7 @@ export default function Certificates() {
             <table className='w-full text-sm min-w-[800px]'>
               <thead>
                 <tr className='border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50'>
-                  {[c.cols.number, c.cols.owner, "O'lchov vositasi", 'Zavod raqami', c.cols.issued, c.cols.expires, c.cols.status, c.cols.issuedBy, ''].map((h, i) => (
+                  {[c.cols.number, c.cols.owner, c.cols.deviceName, c.cols.serialNumber, c.cols.issued, c.cols.expires, c.cols.status, c.cols.issuedBy, ''].map((h, i) => (
                     <th key={i} className='text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide'>{h}</th>
                   ))}
                 </tr>
@@ -59,13 +62,13 @@ export default function Certificates() {
                       <span className='font-mono font-semibold' style={{ color: 'hsl(205,45%,25%)' }}>{cert.certNumber}</span>
                     </td>
                     <td className='px-5 py-3 text-gray-700 dark:text-slate-200'>
-                      {cert.application ? applicantName(cert.application) : `Ariza #${cert.applicationId}`}
+                      {cert.application ? applicantName(cert.application) : `${c.appRef}${cert.applicationId}`}
                     </td>
                     <td className='px-5 py-3 text-gray-700 dark:text-slate-200'>{cert.deviceName ?? '—'}</td>
                     <td className='px-5 py-3 text-gray-500 dark:text-slate-400 font-mono text-xs'>{cert.serialNumber ?? '—'}</td>
-                    <td className='px-5 py-3 text-gray-500 dark:text-slate-400'>{new Date(cert.issuedAt).toLocaleDateString('uz-UZ')}</td>
+                    <td className='px-5 py-3 text-gray-500 dark:text-slate-400'>{new Date(cert.issuedAt).toLocaleDateString(locale)}</td>
                     <td className='px-5 py-3 text-gray-500 dark:text-slate-400'>
-                      {cert.expiresAt ? new Date(cert.expiresAt).toLocaleDateString('uz-UZ') : '—'}
+                      {cert.expiresAt ? new Date(cert.expiresAt).toLocaleDateString(locale) : '—'}
                     </td>
                     <td className='px-5 py-3'>
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${cert.status === 'active' ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 line-through'}`}>

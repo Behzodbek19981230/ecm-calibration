@@ -77,6 +77,8 @@ function RejectModal({
 	onConfirm: (reason: string) => void;
 	loading: boolean;
 }) {
+	const { t } = useLang();
+	const d = t.appDetail;
 	const [reason, setReason] = useState('');
 
 	return (
@@ -86,7 +88,7 @@ function RejectModal({
 					<div className='flex items-center gap-2'>
 						<FileX size={18} className='text-red-500' />
 						<h2 className='text-sm font-semibold text-gray-800 dark:text-slate-100'>
-							Bekor qilish xatini shakllantirish
+							{d.rejectModalTitle}
 						</h2>
 					</div>
 					<button
@@ -97,14 +99,12 @@ function RejectModal({
 					</button>
 				</div>
 				<div className='p-5 space-y-3'>
-					<p className='text-xs text-gray-500 dark:text-slate-400'>
-						Rad etish sababini kiriting. Bu matn arizachiga xat ko'rinishida yuboriladi.
-					</p>
+					<p className='text-xs text-gray-500 dark:text-slate-400'>{d.rejectReasonHint}</p>
 					<textarea
 						value={reason}
 						onChange={(e) => setReason(e.target.value)}
 						rows={5}
-						placeholder="Masalan: Taqdim etilgan qurilmalar ro'yxati to'liq emas. Iltimos, barcha asbob-uskunalar seriya raqamlari bilan qayta yuboring..."
+						placeholder={d.rejectReasonPlaceholder}
 						className='w-full px-3 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none'
 					/>
 				</div>
@@ -114,7 +114,7 @@ function RejectModal({
 						disabled={loading}
 						className='px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors'
 					>
-						Bekor qilish
+						{t.common.cancel}
 					</button>
 					<button
 						onClick={() => onConfirm(reason)}
@@ -122,7 +122,7 @@ function RejectModal({
 						className='px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2'
 					>
 						{loading ? <Loader2 size={14} className='animate-spin' /> : <FileX size={14} />}
-						Xat shakllantirish va yuborish
+						{d.generateLetter}
 					</button>
 				</div>
 			</div>
@@ -147,6 +147,8 @@ function ContractModal({
 	onConfirm: (price: string) => void;
 	loading: boolean;
 }) {
+	const { t } = useLang();
+	const d = t.appDetail;
 	const [raw, setRaw] = useState('');
 	const formatted = formatMoney(raw);
 	const displayPrice = formatted ? `${formatted} so'm` : '';
@@ -164,7 +166,7 @@ function ContractModal({
 				<div className='flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-slate-700'>
 					<div className='flex items-center gap-2'>
 						<ScrollText size={18} className='text-purple-500' />
-						<h2 className='text-sm font-semibold text-gray-800 dark:text-slate-100'>Shartnoma yuborish</h2>
+						<h2 className='text-sm font-semibold text-gray-800 dark:text-slate-100'>{d.contractModalTitle}</h2>
 					</div>
 					<button
 						onClick={onClose}
@@ -185,7 +187,7 @@ function ContractModal({
 
 					<div>
 						<label className='block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5'>
-							Xizmat narxi / Стоимость услуг <span className='text-red-500'>*</span>
+							{d.priceLabel} <span className='text-red-500'>*</span>
 						</label>
 						<div className='flex items-center gap-2'>
 							<div className='relative flex-1'>
@@ -210,8 +212,7 @@ function ContractModal({
 					</div>
 
 					<p className='text-xs text-gray-400 dark:text-slate-500'>
-						Shartnoma <strong className='text-gray-600 dark:text-slate-300'>{channel}</strong> orqali
-						arizachiga yuboriladi.
+						{d.contractSentVia.replace('{channel}', channel)}
 					</p>
 				</div>
 
@@ -221,7 +222,7 @@ function ContractModal({
 						disabled={loading}
 						className='px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors'
 					>
-						Bekor qilish
+						{t.common.cancel}
 					</button>
 					<button
 						onClick={() => onConfirm(displayPrice)}
@@ -229,7 +230,7 @@ function ContractModal({
 						className='px-4 py-2 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center gap-2'
 					>
 						{loading ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />}
-						Yuborish
+						{d.send}
 					</button>
 				</div>
 			</div>
@@ -252,6 +253,8 @@ function AttachCertModal({
 	onConfirm: (url: string, file?: File) => void;
 	loading: boolean;
 }) {
+	const { t } = useLang();
+	const d = t.appDetail;
 	const [url, setUrl] = useState('');
 	const fileRef = useRef<HTMLInputElement>(null);
 
@@ -267,7 +270,7 @@ function AttachCertModal({
 					<div className='flex items-center gap-2'>
 						<Award size={18} className='text-teal-500' />
 						<h2 className='text-sm font-semibold text-gray-800 dark:text-slate-100'>
-							Sertifikat biriktirish
+							{d.attachCertTitle}
 						</h2>
 					</div>
 					<button onClick={onClose} className='p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'>
@@ -278,17 +281,15 @@ function AttachCertModal({
 					<div className='p-3 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900'>
 						<p className='text-xs font-semibold text-teal-700 dark:text-teal-400'>{deviceName}</p>
 						{serialNumber && (
-							<p className='text-xs text-teal-600 dark:text-teal-500 mt-0.5'>Zavod raqami: {serialNumber}</p>
+							<p className='text-xs text-teal-600 dark:text-teal-500 mt-0.5'>{d.serialLabel} {serialNumber}</p>
 						)}
 					</div>
 
-					<p className='text-xs text-gray-400 dark:text-slate-500'>
-						URL <strong>yoki</strong> fayl — kamida biri majburiy
-					</p>
+					<p className='text-xs text-gray-400 dark:text-slate-500'>{d.urlOrFile}</p>
 
 					<div>
 						<label className='block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5'>
-							Sertifikat URL
+							{d.certUrlLabel}
 						</label>
 						<input
 							type='url'
@@ -307,7 +308,7 @@ function AttachCertModal({
 
 					<div>
 						<label className='block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5'>
-							Sertifikat fayli (PDF / rasm)
+							{d.certFileLabel}
 						</label>
 						<input
 							ref={fileRef}
@@ -324,7 +325,7 @@ function AttachCertModal({
 						disabled={loading}
 						className='px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors'
 					>
-						Bekor qilish
+						{t.common.cancel}
 					</button>
 					<button
 						onClick={() => onConfirm(url.trim(), fileRef.current?.files?.[0])}
@@ -332,7 +333,7 @@ function AttachCertModal({
 						className='px-4 py-2 rounded-xl text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors flex items-center gap-2'
 					>
 						{loading ? <Loader2 size={14} className='animate-spin' /> : <Award size={14} />}
-						Biriktirish
+						{d.attachBtn}
 					</button>
 				</div>
 			</div>
@@ -345,6 +346,7 @@ export default function ApplicationDetail() {
 	const navigate = useNavigate();
 	const { t } = useLang();
 	const a = t.applications;
+	const d = t.appDetail;
 
 	const isChiefLab = hasRole('chief_laboratory');
 	const isAdmin = hasRole('admin');
@@ -448,7 +450,7 @@ export default function ApplicationDetail() {
 	if (!app)
 		return (
 			<div className='p-8 text-center text-gray-400 dark:text-slate-500'>
-				<p>Ariza topilmadi</p>
+				<p>{d.notFound}</p>
 				<button onClick={() => navigate('/applications')} className='mt-3 text-sm underline'>
 					{a.title}
 				</button>
@@ -482,11 +484,11 @@ export default function ApplicationDetail() {
 			)}
 			{attachingDeviceIdx !== null && app && (() => {
 				const devs = app.devices as { type: string; serialNumber?: string }[];
-				const d = devs[attachingDeviceIdx];
-				return d ? (
+				const dev = devs[attachingDeviceIdx];
+				return dev ? (
 					<AttachCertModal
-						deviceName={d.type}
-						serialNumber={d.serialNumber}
+						deviceName={dev.type}
+						serialNumber={dev.serialNumber}
 						onClose={() => setAttachingDeviceIdx(null)}
 						onConfirm={handleAttachCert}
 						loading={attachCertMutation.isPending}
@@ -505,8 +507,7 @@ export default function ApplicationDetail() {
 					</button>
 					<div>
 						<h1 className='text-xl font-bold text-gray-800 dark:text-slate-100'>
-							{a.appNum}
-							{app.id}
+							{a.appNum}{app.id}
 						</h1>
 						<p className='text-xs text-gray-400 dark:text-slate-500 mt-0.5'>
 							{new Date(app.createdAt).toLocaleString('uz-UZ')}
@@ -526,13 +527,13 @@ export default function ApplicationDetail() {
 				{actionDone === 'accepted' && (
 					<div className='mb-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 flex items-center gap-3 text-sm text-green-700 dark:text-green-400'>
 						<CheckCircle size={16} />
-						Ariza qabul qilindi. Status "Shartnoma tuzish" ga o'tkazildi.
+						{d.acceptedBanner}
 					</div>
 				)}
 				{actionDone === 'rejected' && (
 					<div className='mb-4 p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 flex items-center gap-3 text-sm text-red-700 dark:text-red-400'>
 						<XCircle size={16} />
-						Ariza rad etildi. Bekor qilish xati shakllandi va arizachiga yuborildi.
+						{d.rejectedBanner}
 					</div>
 				)}
 
@@ -554,7 +555,7 @@ export default function ApplicationDetail() {
 								</h2>
 							</div>
 							<div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-								<Field label={app.userType === 'individual' ? t.users.fullName : t.users.login}>
+								<Field label={app.userType === 'individual' ? t.users.fullName : d.orgName}>
 									{app.userType === 'individual' ? app.fullName || '—' : app.orgName || '—'}
 								</Field>
 								<Field label={t.common.status}>
@@ -594,13 +595,9 @@ export default function ApplicationDetail() {
 								className={`inline-flex items-center gap-1.5 text-sm font-medium ${app.notifyMethod === 'telegram' ? 'text-[#0088CC]' : 'text-gray-600 dark:text-slate-300'}`}
 							>
 								{app.notifyMethod === 'telegram' ? (
-									<>
-										<MessageCircle size={15} /> Telegram
-									</>
+									<><MessageCircle size={15} /> Telegram</>
 								) : (
-									<>
-										<Mail size={15} /> Email — {app.email}
-									</>
+									<><Mail size={15} /> Email — {app.email}</>
 								)}
 							</span>
 						</div>
@@ -617,7 +614,7 @@ export default function ApplicationDetail() {
 								<p className='text-sm text-gray-400 dark:text-slate-500'>{a.noDevices}</p>
 							) : (
 								<div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-									{devices.map((d, i) => (
+									{devices.map((dev, i) => (
 										<div
 											key={i}
 											className='p-3 rounded-xl bg-gray-50 dark:bg-slate-700/60 space-y-1'
@@ -630,24 +627,18 @@ export default function ApplicationDetail() {
 													{i + 1}
 												</span>
 												<p className='text-sm font-semibold text-gray-800 dark:text-slate-100 leading-tight'>
-													{d.type}
+													{dev.type}
 												</p>
 											</div>
 											<div className='pl-7 space-y-0.5'>
-												{d.accuracyClass && (
-													<p className='text-xs text-gray-500 dark:text-slate-400'>
-														{d.accuracyClass}
-													</p>
+												{dev.accuracyClass && (
+													<p className='text-xs text-gray-500 dark:text-slate-400'>{dev.accuracyClass}</p>
 												)}
-												{d.measureRange && (
-													<p className='text-xs text-gray-500 dark:text-slate-400'>
-														{d.measureRange}
-													</p>
+												{dev.measureRange && (
+													<p className='text-xs text-gray-500 dark:text-slate-400'>{dev.measureRange}</p>
 												)}
-												{d.serialNumber && (
-													<p className='text-xs text-gray-500 dark:text-slate-400'>
-														№ {d.serialNumber}
-													</p>
+												{dev.serialNumber && (
+													<p className='text-xs text-gray-500 dark:text-slate-400'>№ {dev.serialNumber}</p>
 												)}
 											</div>
 										</div>
@@ -662,15 +653,15 @@ export default function ApplicationDetail() {
 								<div className='flex items-center gap-2 mb-3'>
 									<Award size={15} className='text-teal-500' />
 									<h2 className='text-sm font-semibold text-gray-700 dark:text-slate-200'>
-										Sertifikatlar biriktirish
+										{d.certSection}
 									</h2>
 								</div>
 								{devices.length === 0 ? (
-									<p className='text-sm text-gray-400 dark:text-slate-500'>O'lchov vositalari mavjud emas</p>
+									<p className='text-sm text-gray-400 dark:text-slate-500'>{d.noDevices}</p>
 								) : (
 									<div className='space-y-2'>
-										{devices.map((d, i) => {
-											const device = d as { type: string; serialNumber?: string };
+										{devices.map((dev, i) => {
+											const device = dev as { type: string; serialNumber?: string };
 											const cert = (app.certificates ?? []).find((c) => c.deviceIndex === i);
 											return (
 												<div key={i} className='flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-700/60'>
@@ -679,7 +670,7 @@ export default function ApplicationDetail() {
 														{device.serialNumber ? (
 															<p className='text-xs text-gray-400 dark:text-slate-500'>SN: {device.serialNumber}</p>
 														) : (
-															<p className='text-xs text-gray-400 dark:text-slate-500'>Zavod raqamisiz</p>
+															<p className='text-xs text-gray-400 dark:text-slate-500'>{d.noSerial}</p>
 														)}
 													</div>
 													{cert ? (
@@ -702,7 +693,7 @@ export default function ApplicationDetail() {
 															onClick={() => setAttachingDeviceIdx(i)}
 															className='shrink-0 text-xs px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-semibold transition-colors'
 														>
-															Biriktirish
+															{d.attachBtn}
 														</button>
 													)}
 												</div>
@@ -739,10 +730,10 @@ export default function ApplicationDetail() {
 						{canDecide && isNew && !actionDone && (
 							<div className='bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5'>
 								<h2 className='text-sm font-semibold text-gray-700 dark:text-slate-200 mb-1'>
-									Laboratoriya qarori
+									{d.labDecisionTitle}
 								</h2>
 								<p className='text-xs text-gray-400 dark:text-slate-500 mb-4'>
-									Yangi arizani qabul qiling yoki rad eting
+									{d.labDecisionDesc}
 								</p>
 								<div className='space-y-2'>
 									<button
@@ -755,7 +746,7 @@ export default function ApplicationDetail() {
 										) : (
 											<ThumbsUp size={14} />
 										)}
-										Qabul qilish
+										{d.accept}
 									</button>
 									<button
 										onClick={() => setShowRejectModal(true)}
@@ -763,29 +754,29 @@ export default function ApplicationDetail() {
 										className='w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-60 transition-colors'
 									>
 										<ThumbsDown size={14} />
-										Rad etish
+										{d.reject}
 									</button>
 								</div>
 							</div>
 						)}
 
-						{/* Contract stage: send contract + paid buttons */}
+						{/* Contract stage */}
 						{canContract && app.status === 'contract' && (
 							<div className='bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5'>
 								<div className='flex items-center gap-2 mb-1'>
 									<ScrollText size={15} className='text-purple-500' />
 									<h2 className='text-sm font-semibold text-gray-700 dark:text-slate-200'>
-										Shartnoma bosqichi
+										{d.contractStageTitle}
 									</h2>
 								</div>
 								<p className='text-xs text-gray-400 dark:text-slate-500 mb-4'>
-									Shartnomani yuboring, to'lov qilingach keyingi bosqichga o'ting.
+									{d.contractStageDesc}
 								</p>
 								<div className='space-y-2'>
 									{contractSent ? (
 										<div className='flex items-center gap-2 text-sm text-green-600 dark:text-green-400 font-medium px-1'>
 											<CheckCircle size={15} />
-											Shartnoma yuborildi!
+											{d.contractSent}
 										</div>
 									) : (
 										<button
@@ -793,7 +784,7 @@ export default function ApplicationDetail() {
 											className='w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 transition-colors'
 										>
 											<ScrollText size={14} />
-											Shartnoma yuborish
+											{d.sendContract}
 										</button>
 									)}
 									<button
@@ -806,23 +797,23 @@ export default function ApplicationDetail() {
 										) : (
 											<CheckCircle size={14} />
 										)}
-										To'landi
+										{d.paid}
 									</button>
 								</div>
 							</div>
 						)}
 
-						{/* Acceptance stage: receive instruments */}
+						{/* Acceptance stage */}
 						{canAcceptInstruments && app.status === 'acceptance' && (
 							<div className='bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5'>
 								<div className='flex items-center gap-2 mb-1'>
 									<PackageCheck size={15} className='text-amber-500' />
 									<h2 className='text-sm font-semibold text-gray-700 dark:text-slate-200'>
-										Qabul qilish bosqichi
+										{d.acceptanceTitle}
 									</h2>
 								</div>
 								<p className='text-xs text-gray-500 dark:text-slate-400 mb-3'>
-									O'lchov vositalarini qabul qilgach laboratoriya tekshiruviga o'tkazing.
+									{d.acceptanceDesc}
 								</p>
 								<button
 									onClick={async () => {
@@ -836,7 +827,7 @@ export default function ApplicationDetail() {
 									{instrumentsMutation.isPending
 										? <Loader2 size={14} className='animate-spin' />
 										: <PackageCheck size={14} />}
-									O'lchov vositalarini qabul qilish
+									{d.acceptInstruments}
 								</button>
 							</div>
 						)}
@@ -850,13 +841,13 @@ export default function ApplicationDetail() {
 									<div className='flex items-center gap-2 mb-1'>
 										<FlaskConical size={15} className='text-teal-500' />
 										<h2 className='text-sm font-semibold text-gray-700 dark:text-slate-200'>
-											Laboratoriya bosqichi
+											{d.labStageTitle}
 										</h2>
 									</div>
 									<p className='text-xs text-gray-400 dark:text-slate-500 mb-3'>
 										{allAttached
-											? 'Barcha sertifikatlar biriktirildi. Yakunlash mumkin.'
-											: `${certs.length}/${devices.length} sertifikat biriktirildi.`}
+											? d.labAllAttached
+											: `${certs.length}/${devices.length} ${t.certificates.subtitle}`}
 									</p>
 									<button
 										onClick={async () => {
@@ -870,7 +861,7 @@ export default function ApplicationDetail() {
 										{completeMutation.isPending
 											? <Loader2 size={14} className='animate-spin' />
 											: <CheckCircle size={14} />}
-										Yakunlash
+										{d.complete}
 									</button>
 								</div>
 							);
@@ -882,11 +873,11 @@ export default function ApplicationDetail() {
 								<div className='flex items-center gap-2 mb-2'>
 									<XCircle size={15} className='text-red-500' />
 									<h2 className='text-sm font-semibold text-red-700 dark:text-red-400'>
-										Ariza rad etilgan
+										{d.rejectedStatusTitle}
 									</h2>
 								</div>
 								<p className='text-xs text-red-600 dark:text-red-400'>
-									Bekor qilish xatini ko'rish uchun "Bekor qilish xatlari" bo'limiga o'ting.
+									{d.rejectedStatusDesc}
 								</p>
 							</div>
 						)}
@@ -905,7 +896,7 @@ export default function ApplicationDetail() {
 							return (
 								<div className='bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5'>
 									<h2 className='text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4'>
-										Jarayon holati
+										{d.processTitle}
 									</h2>
 									<div>
 										{STEPS.map(({ key, Icon, label, bg }, i) => {
@@ -938,7 +929,7 @@ export default function ApplicationDetail() {
 															{label}
 														</p>
 														{isActive && (
-															<p className='text-[10px] text-gray-400 dark:text-slate-500 mt-0.5'>Hozirgi holat</p>
+															<p className='text-[10px] text-gray-400 dark:text-slate-500 mt-0.5'>{d.currentStatus}</p>
 														)}
 													</div>
 												</div>
@@ -949,7 +940,7 @@ export default function ApplicationDetail() {
 										<div className='mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900'>
 											<XCircle size={14} className='text-red-500 shrink-0' />
 											<span className='text-xs font-semibold text-red-600 dark:text-red-400'>
-												{t.status.rejected ?? 'Rad etilgan'}
+												{t.status.rejected}
 											</span>
 										</div>
 									)}
@@ -964,7 +955,7 @@ export default function ApplicationDetail() {
 									{a.sendNotify}
 								</h2>
 								<p className='text-xs text-gray-400 dark:text-slate-500 mb-3'>
-									{app.notifyMethod === 'telegram' ? 'Telegram' : 'Email'} orqali yuboriladi
+									{d.notifySentVia.replace('{channel}', app.notifyMethod === 'telegram' ? 'Telegram' : 'Email')}
 								</p>
 								<button
 									onClick={sendNotify}
@@ -979,7 +970,7 @@ export default function ApplicationDetail() {
 									) : (
 										<Send size={15} />
 									)}
-									{notifying ? 'Yuborilmoqda...' : notifyDone ? 'Yuborildi!' : a.sendNotify}
+									{notifying ? d.sending : notifyDone ? d.sent : a.sendNotify}
 								</button>
 							</div>
 						)}

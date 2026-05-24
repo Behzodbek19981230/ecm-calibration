@@ -4,9 +4,12 @@ import { useContacts, useMarkContactRead, useDeleteContact } from '../services/c
 import type { Contact } from '../lib/types';
 import { useLang } from '../lib/LangContext';
 
+const LOCALE_MAP: Record<string, string> = { uz: 'uz-UZ', ru: 'ru-RU', en: 'en-US' };
+
 export default function Contacts() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const c = t.contacts;
+  const locale = LOCALE_MAP[lang] ?? 'uz-UZ';
 
   const { data: contacts = [], isLoading } = useContacts();
   const markRead   = useMarkContactRead();
@@ -71,7 +74,7 @@ export default function Contacts() {
                     </td>
                     <td className='px-5 py-3.5 text-sm text-gray-600 dark:text-slate-300'>{contact.email}</td>
                     <td className='px-5 py-3.5 text-sm text-gray-500 dark:text-slate-400'>{contact.company || '—'}</td>
-                    <td className='px-5 py-3.5 text-xs text-gray-400 dark:text-slate-500'>{new Date(contact.createdAt).toLocaleDateString('uz-UZ')}</td>
+                    <td className='px-5 py-3.5 text-xs text-gray-400 dark:text-slate-500'>{new Date(contact.createdAt).toLocaleDateString(locale)}</td>
                     <td className='px-5 py-3.5'>
                       <div className='flex items-center gap-1 justify-end'>
                         <button onClick={() => handleView(contact)} className='p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-all' title={t.common.view}>
@@ -133,7 +136,7 @@ export default function Contacts() {
                 <p className='text-xs font-medium text-gray-400 dark:text-slate-500 uppercase mb-1'>{c.message}</p>
                 <p className='text-sm text-gray-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed'>{selected.message}</p>
               </div>
-              <p className='text-xs text-gray-400 dark:text-slate-500'>{new Date(selected.createdAt).toLocaleString('uz-UZ')}</p>
+              <p className='text-xs text-gray-400 dark:text-slate-500'>{new Date(selected.createdAt).toLocaleString(locale)}</p>
             </div>
           </div>
         </div>

@@ -2,17 +2,11 @@ import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import api from '../lib/api';
+import { useLang } from '../lib/LangContext';
 
 type Lang = 'Uz' | 'Ru' | 'En';
 const LANGS: Lang[] = ['Uz', 'Ru', 'En'];
 const LANG_FLAGS: Record<Lang, string> = { Uz: '🇺🇿', Ru: '🇷🇺', En: '🇬🇧' };
-
-const CATEGORIES = [
-  { value: 'calibration', label: 'Kalibrlash' },
-  { value: 'metrology', label: 'Metrologiya' },
-  { value: 'standards', label: 'Standartlar' },
-  { value: 'news', label: 'Yangiliklar' },
-];
 
 type FormData = {
   titleUz: string; titleRu: string; titleEn: string;
@@ -55,6 +49,9 @@ function Field({
 export default function BlogEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLang();
+  const be = t.blogEdit;
+  const b = t.blog;
   const isNew = !id;
 
   const [form, setForm] = useState<FormData>(EMPTY);
@@ -62,6 +59,13 @@ export default function BlogEdit() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const CATEGORIES = [
+    { value: 'calibration', label: b.categories.calibration },
+    { value: 'metrology',   label: b.categories.metrology },
+    { value: 'standards',   label: b.categories.standards },
+    { value: 'news',        label: b.categories.news },
+  ];
 
   useEffect(() => {
     if (!isNew) {
@@ -97,7 +101,7 @@ export default function BlogEdit() {
       }
       navigate('/blog');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Xatolik yuz berdi';
+      const message = err instanceof Error ? err.message : t.common.error;
       setError(message);
     } finally {
       setSaving(false);
@@ -106,7 +110,7 @@ export default function BlogEdit() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-sm text-gray-400">Yuklanmoqda...</div>
+      <div className="p-8 text-center text-sm text-gray-400">{t.common.loading}</div>
     );
   }
 
@@ -121,8 +125,8 @@ export default function BlogEdit() {
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            {isNew ? 'Yangi post' : 'Postni tahrirlash'}
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-slate-100">
+            {isNew ? be.newPost : be.editPost}
           </h1>
         </div>
       </div>
@@ -136,15 +140,15 @@ export default function BlogEdit() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Metadata row */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <h2 className="font-semibold text-gray-700 mb-4 text-sm">Umumiy sozlamalar</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
+          <h2 className="font-semibold text-gray-700 dark:text-slate-200 mb-4 text-sm">{be.generalSettings}</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Kategoriya</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">{be.category}</label>
               <select
                 value={form.category}
                 onChange={(e) => set('category', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-[hsl(205,45%,25%)] transition-all"
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-600 rounded-lg text-sm outline-none focus:border-[hsl(205,45%,25%)] transition-all bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-100"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
@@ -161,30 +165,32 @@ export default function BlogEdit() {
                     className="sr-only"
                   />
                   <div
-                    className={`w-10 h-6 rounded-full transition-colors ${form.isPublished ? 'bg-[hsl(205,45%,25%)]' : 'bg-gray-200'}`}
+                    className={`w-10 h-6 rounded-full transition-colors ${form.isPublished ? 'bg-[hsl(205,45%,25%)]' : 'bg-gray-200 dark:bg-slate-600'}`}
                   >
                     <div
                       className={`w-4 h-4 bg-white rounded-full shadow transition-transform mt-1 ${form.isPublished ? 'translate-x-5' : 'translate-x-1'}`}
                     />
                   </div>
                 </div>
-                <span className="text-sm font-medium text-gray-700">Chop etilgan</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-slate-200">{b.published}</span>
               </label>
             </div>
           </div>
         </div>
 
         {/* Multilingual content */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-slate-700">
           {/* Lang tabs */}
-          <div className="flex gap-1 mb-6 p-1 bg-gray-100 rounded-xl w-fit">
+          <div className="flex gap-1 mb-6 p-1 bg-gray-100 dark:bg-slate-700 rounded-xl w-fit">
             {LANGS.map((l) => (
               <button
                 key={l}
                 type="button"
                 onClick={() => setActiveLang(l)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeLang === l ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'
+                  activeLang === l
+                    ? 'bg-white dark:bg-slate-800 shadow-sm text-gray-800 dark:text-slate-100'
+                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'
                 }`}
               >
                 <span>{LANG_FLAGS[l]}</span>
@@ -195,20 +201,20 @@ export default function BlogEdit() {
 
           <div className="space-y-4">
             <Field
-              label={`Sarlavha (${activeLang})`}
+              label={`${be.titleLabel} (${activeLang})`}
               value={form[`title${activeLang}` as keyof FormData] as string}
               onChange={(v) => set(`title${activeLang}` as keyof FormData, v)}
               required={activeLang === 'Uz'}
             />
             <Field
-              label={`Qisqacha (${activeLang})`}
+              label={`${be.excerptLabel} (${activeLang})`}
               value={form[`excerpt${activeLang}` as keyof FormData] as string}
               onChange={(v) => set(`excerpt${activeLang}` as keyof FormData, v)}
               multiline
               required={activeLang === 'Uz'}
             />
             <Field
-              label={`To'liq matn (${activeLang})`}
+              label={`${be.contentLabel} (${activeLang})`}
               value={form[`content${activeLang}` as keyof FormData] as string}
               onChange={(v) => set(`content${activeLang}` as keyof FormData, v)}
               multiline
@@ -225,14 +231,14 @@ export default function BlogEdit() {
             style={{ background: 'hsl(205,45%,25%)' }}
           >
             <Save size={15} />
-            {saving ? 'Saqlanmoqda...' : 'Saqlash'}
+            {saving ? t.common.saving : t.common.save}
           </button>
           <button
             type="button"
             onClick={() => navigate('/blog')}
-            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all"
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all"
           >
-            Bekor qilish
+            {t.common.cancel}
           </button>
         </div>
       </form>

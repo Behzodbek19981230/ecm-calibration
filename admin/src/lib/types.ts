@@ -74,6 +74,7 @@ export interface DashboardStats {
     acceptance: number;
     laboratory: number;
     completed: number;
+    rejected: number;
     perMonth: Array<{ month: string; count: number }>;
   };
   users: { total: number };
