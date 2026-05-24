@@ -30,6 +30,7 @@ export default function Navbar() {
 		{ href: '/about', label: t.nav.about },
 		{ href: '/services', label: t.nav.services },
 		{ href: '/accreditation', label: t.nav.accreditation },
+		{ href: '/#hamkorlar', label: t.nav.partners },
 		{ href: '/contact', label: t.nav.contact },
 	];
 

@@ -10,6 +10,7 @@ export const translations = {
       contact: "Aloqa",
       blog: "Blog",
       accreditation: "Akkreditatsiya doirasi",
+      partners: "Hamkorlarimiz",
       order: "Buyurtma berish",
     },
     hero: {
@@ -252,6 +253,11 @@ export const translations = {
         save: "Qo'shish",
       },
     },
+    partners: {
+      badge: "Ishonchli hamkorlar",
+      title: "Hamkorlarimiz",
+      subtitle: "Biz bilan hamkorlik qilayotgan yetakchi tashkilotlar",
+    },
     toast: {
       success: "Xabar muvaffaqiyatli yuborildi!",
       error: "Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
@@ -275,6 +281,7 @@ export const translations = {
       contact: "Контакты",
       blog: "Блог",
       accreditation: "Область аккредитации",
+      partners: "Наши партнёры",
       order: "Заказать",
     },
     hero: {
@@ -517,6 +524,11 @@ export const translations = {
         save: "Добавить",
       },
     },
+    partners: {
+      badge: "Надёжные партнёры",
+      title: "Наши партнёры",
+      subtitle: "Ведущие организации, работающие с нами",
+    },
     toast: {
       success: "Сообщение успешно отправлено!",
       error: "Произошла ошибка. Пожалуйста, попробуйте снова.",
@@ -540,6 +552,7 @@ export const translations = {
       contact: "Contact",
       blog: "Blog",
       accreditation: "Accreditation Scope",
+      partners: "Our Partners",
       order: "Order Now",
     },
     hero: {
@@ -781,6 +794,11 @@ export const translations = {
         cancel: "Cancel",
         save: "Add",
       },
+    },
+    partners: {
+      badge: "Trusted Partners",
+      title: "Our Partners",
+      subtitle: "Leading organizations working with us",
     },
     toast: {
       success: "Message sent successfully!",
