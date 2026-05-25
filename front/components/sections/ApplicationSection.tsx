@@ -205,7 +205,6 @@ export default function ApplicationSection() {
 		setOrgName('');
 		setPhone('');
 		setEmail('');
-		setBranchRequest(false);
 		setNotifyMethod('email');
 		setTelegramChatId('');
 		setDevices([]);
