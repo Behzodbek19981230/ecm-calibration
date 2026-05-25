@@ -10,7 +10,7 @@ export interface Region {
   districts: District[];
 }
 
-export type UserRole = 'admin' | 'manager' | 'buyro' | 'chief_laboratory';
+export type UserRole = 'superadmin' | 'admin' | 'manager' | 'buyro' | 'chief_laboratory';
 
 export interface UserRoleRecord {
   id: number;

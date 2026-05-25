@@ -3,13 +3,14 @@ import { z } from 'zod';
 import api from '../lib/api';
 import type { User } from '../lib/types';
 
+// superadmin is intentionally excluded — cannot be created via UI
 export const VALID_ROLES = ['admin', 'manager', 'buyro', 'chief_laboratory'] as const;
+export const ALL_ROLES = ['superadmin', 'admin', 'manager', 'buyro', 'chief_laboratory'] as const;
 
 export const userFormSchema = z.object({
   username: z.string().min(3, 'Kamida 3 belgi').max(32),
   password: z.string().optional(),
   fullName: z.string().optional(),
-  // bo'sh satr yoki to'g'ri email — ikkalasi ham qabul qilinadi
   email: z
     .string()
     .optional()
@@ -18,7 +19,7 @@ export const userFormSchema = z.object({
       "Noto'g'ri email",
     ),
   isActive: z.boolean(),
-  roles: z.array(z.enum(VALID_ROLES)).min(1, 'Kamida bitta rol tanlang'),
+  roles: z.array(z.enum(ALL_ROLES)).min(1, 'Kamida bitta rol tanlang'),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;
