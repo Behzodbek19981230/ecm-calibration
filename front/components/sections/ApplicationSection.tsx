@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Plus, Trash2, Upload, FileText, Mail, User, ClipboardList } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
-import Checkbox from '@/components/ui/Checkbox';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import TelegramConnect from '@/components/ui/TelegramConnect';
@@ -96,7 +95,6 @@ export default function ApplicationSection() {
 	const [orgName, setOrgName] = useState('');
 	const [phone, setPhone] = useState('');
 	const [email, setEmail] = useState('');
-	const [branchRequest, setBranchRequest] = useState(false);
 	const [notifyMethod, setNotifyMethod] = useState<'email' | 'telegram'>('email');
 	const [telegramChatId, setTelegramChatId] = useState('');
 	const [errors, setErrors] = useState<Record<string, string>>({});
@@ -180,7 +178,6 @@ export default function ApplicationSection() {
 			if (userType === 'legal') fd.append('orgName', orgName);
 			fd.append('phone', phone);
 			fd.append('email', email);
-			fd.append('branchRequest', String(branchRequest));
 			fd.append('notifyMethod', notifyMethod);
 			if (notifyMethod === 'telegram' && telegramChatId) fd.append('telegramChatId', telegramChatId);
 			fd.append('devices', JSON.stringify(devices));
@@ -305,11 +302,6 @@ export default function ApplicationSection() {
 								<Input label={a.phone} type='tel' value={phone} onChange={(e) => { setPhone(e.target.value); setErrors((p) => ({ ...p, phone: '' })); }} placeholder='+998 XX XXX XX XX' error={errors.phone} />
 								<Input label={a.email} type='email' value={email} onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: '' })); }} placeholder='example@mail.com' error={errors.email} />
 							</div>
-							{userType === 'legal' && (
-								<div className='mt-3'>
-									<Checkbox label={a.branchRequest} checked={branchRequest} onChange={setBranchRequest} />
-								</div>
-							)}
 						</div>
 
 						{/* — Notification — */}

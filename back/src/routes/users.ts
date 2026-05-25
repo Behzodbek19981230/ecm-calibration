@@ -7,6 +7,7 @@ import { requireAuth, requireRole, AuthRequest } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
+const ALL_ROLES = ['superadmin', 'admin', 'manager', 'buyro', 'chief_laboratory'] as const;
 const VALID_ROLES = ['admin', 'manager', 'buyro', 'chief_laboratory'] as const;
 
 const userCreateSchema = z.object({
@@ -15,7 +16,7 @@ const userCreateSchema = z.object({
   fullName: z.string().optional().default(''),
   email: z.union([z.string().email(), z.literal('')]).optional().default(''),
   isActive: z.boolean().default(true),
-  roles: z.array(z.enum(VALID_ROLES)).min(1),
+  roles: z.array(z.enum(ALL_ROLES)).min(1),
 });
 
 const userUpdateSchema = z.object({
@@ -23,14 +24,15 @@ const userUpdateSchema = z.object({
   fullName: z.string().optional(),
   email: z.union([z.string().email(), z.literal('')]).optional(),
   isActive: z.boolean().optional(),
-  roles: z.array(z.enum(VALID_ROLES)).min(1).optional(),
+  roles: z.array(z.enum(ALL_ROLES)).min(1).optional(),
 });
 
-// GET /api/users
+// GET /api/users — superadmin users are never exposed
 router.get('/', requireAuth, requireRole('admin'), async (_req: AuthRequest, res: Response): Promise<void> => {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
     include: { roles: true },
+    where: { roles: { none: { role: 'superadmin' } } },
   });
   res.json(users.map((u) => ({ ...u, password: undefined })));
 });

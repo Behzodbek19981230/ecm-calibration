@@ -15,6 +15,7 @@ import {
 	Moon,
 	ChevronDown,
 	FileX,
+	ScrollText,
 } from 'lucide-react';
 import { getRoles, hasRole, logout } from '../lib/auth';
 import { useLang } from '../lib/LangContext';
@@ -72,6 +73,7 @@ export default function Layout() {
 	const showRegions = hasRole('admin');
 	const showUsers = hasRole('admin');
 	const showRejections = hasRole('admin', 'chief_laboratory');
+	const showLogs = hasRole('superadmin');
 
 	const navItems = [
 		{ to: '/certificates', icon: Award, label: t.nav.certificates, show: showCertificates },
@@ -79,6 +81,7 @@ export default function Layout() {
 		{ to: '/contacts', icon: Mail, label: t.nav.contacts, show: showContacts },
 		{ to: '/regions', icon: MapPin, label: t.nav.regions, show: showRegions },
 		{ to: '/users', icon: Users, label: t.nav.users, show: showUsers },
+		{ to: '/logs', icon: ScrollText, label: t.nav.logs, show: showLogs },
 	].filter((i) => i.show);
 
 	/* auto-expand applications submenu */
@@ -97,7 +100,8 @@ export default function Layout() {
 		if (location.pathname.startsWith('/dashboard')) return t.nav.dashboard;
 		return (
 			navItems.find((n) => location.pathname.startsWith(n.to))?.label ??
-			(location.pathname.startsWith('/blog') ? t.nav.blog : 'ECM Admin')
+			(location.pathname.startsWith('/blog') ? t.nav.blog :
+			 location.pathname.startsWith('/logs') ? t.nav.logs : 'ECM Admin')
 		);
 	})();
 

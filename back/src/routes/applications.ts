@@ -44,7 +44,6 @@ const applicationSchema = z.object({
 	orgName: z.string().optional(),
 	phone: z.string().min(1),
 	email: z.string().email(),
-	branchRequest: z.preprocess((v) => v === 'true' || v === true, z.boolean()).default(false),
 	notifyMethod: z.enum(['email', 'telegram']).default('email'),
 	telegramChatId: z.string().optional(),
 	devices: z.preprocess((v) => {

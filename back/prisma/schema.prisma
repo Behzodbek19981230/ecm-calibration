@@ -102,6 +102,14 @@ model Certificate {
   createdAt     DateTime    @default(now())
 }
 
+model Log {
+  id        Int      @id @default(autoincrement())
+  level     String   // 'info' | 'warn' | 'error'
+  message   String
+  meta      String?
+  createdAt DateTime @default(now())
+}
+
 model Region {
   id        Int        @id @default(autoincrement())
   name      String     @unique

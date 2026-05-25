@@ -10,6 +10,7 @@ import type { User, UserRole } from '../lib/types';
 import { useLang } from '../lib/LangContext';
 
 const ROLE_COLORS: Record<string, string> = {
+  superadmin:       'bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300',
   admin:            'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400',
   manager:          'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400',
   buyro:            'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-400',
@@ -23,7 +24,8 @@ export default function Users() {
   const { t } = useLang();
   const u = t.users;
 
-  const { data: users = [], isLoading } = useUsers();
+  const { data: rawUsers = [], isLoading } = useUsers();
+  const users = rawUsers.filter((u) => !u.roles.some((r) => r.role === 'superadmin'));
   const createUser   = useCreateUser();
   const updateUser   = useUpdateUser();
   const toggleActive = useToggleUserActive();

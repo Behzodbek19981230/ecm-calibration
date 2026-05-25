@@ -12,6 +12,7 @@ import ApplicationDetail from './pages/ApplicationDetail';
 import Certificates from './pages/Certificates';
 import Users from './pages/Users';
 import RejectionLetters from './pages/RejectionLetters';
+import Logs from './pages/Logs';
 import { isAuthenticated, hasRole } from './lib/auth';
 import { LangProvider } from './lib/LangContext';
 import { ThemeProvider } from './lib/ThemeContext';
@@ -57,6 +58,14 @@ export default function App() {
                 element={
                   <RoleRoute roles={['admin']}>
                     <Users />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="logs"
+                element={
+                  <RoleRoute roles={['superadmin']}>
+                    <Logs />
                   </RoleRoute>
                 }
               />
