@@ -43,12 +43,30 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Request logger
 app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.originalUrl.startsWith('/api/logs')) { next(); return; }
+
   const start = Date.now();
+  const reqBody = req.body && Object.keys(req.body).length ? req.body : undefined;
+
+  // Capture response body by overriding res.json
+  let resBody: unknown;
+  const originalJson = res.json.bind(res) as (body: unknown) => Response;
+  res.json = (body: unknown) => {
+    resBody = body;
+    return originalJson(body);
+  };
+
   res.on('finish', () => {
     const ms = Date.now() - start;
     const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
-    logger[level](`${req.method} ${req.path} ${res.statusCode}`, { ms, ip: req.ip });
+    logger[level](`${req.method} ${req.originalUrl} ${res.statusCode}`, {
+      ms,
+      ip: req.ip,
+      ...(reqBody !== undefined && { req: reqBody }),
+      ...(resBody !== undefined && { res: resBody }),
+    });
   });
+
   next();
 });
 

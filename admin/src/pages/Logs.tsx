@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { RefreshCw, Trash2, ChevronDown, ChevronRight, ScrollText } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { RefreshCw, Trash2, ChevronDown, ChevronRight, ScrollText, Search, X } from 'lucide-react';
 import api from '../lib/api';
 import { useLang } from '../lib/LangContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +28,15 @@ const LEVEL_DOT: Record<string, string> = {
 
 const LIMIT = 50;
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
+
 function MetaCell({ raw }: { raw: string | null }) {
   const [open, setOpen] = useState(false);
   if (!raw) return <span className='text-gray-300 dark:text-slate-600'>—</span>;
@@ -48,20 +57,33 @@ function MetaCell({ raw }: { raw: string | null }) {
 }
 
 export default function Logs() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const l = t.logs;
   const qc = useQueryClient();
 
   const [level, setLevel] = useState<LogLevel>('all');
   const [offset, setOffset] = useState(0);
+  const [searchInput, setSearchInput] = useState('');
+  const search = useDebounce(searchInput, 350);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // reset offset when filters change
+  useEffect(() => { setOffset(0); }, [level, search]);
 
   const fetchLogs = useCallback(
-    () => api.get<{ data: LogEntry[]; total: number }>('/logs', { params: { level, limit: LIMIT, offset } }).then((r) => r.data),
-    [level, offset],
+    () => api.get<{ data: LogEntry[]; total: number }>('/logs', {
+      params: {
+        ...(level !== 'all' && { level }),
+        ...(search && { search }),
+        limit: LIMIT,
+        offset,
+      },
+    }).then((r) => r.data),
+    [level, search, offset],
   );
 
   const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['logs', level, offset],
+    queryKey: ['logs', level, search, offset],
     queryFn: fetchLogs,
   });
 
@@ -95,18 +117,15 @@ export default function Logs() {
   ];
 
   const LOCALE_MAP: Record<string, string> = { uz: 'uz-UZ', ru: 'ru-RU', en: 'en-US' };
-  const { lang } = useLang();
   const locale = LOCALE_MAP[lang] ?? 'uz-UZ';
 
   return (
     <div className='p-4 sm:p-6 lg:p-8'>
       {/* Header */}
-      <div className='flex flex-wrap items-start justify-between gap-3 mb-6'>
+      <div className='flex flex-wrap items-start justify-between gap-3 mb-5'>
         <div>
           <h1 className='text-xl font-bold text-gray-800 dark:text-slate-100'>{l.title}</h1>
-          <p className='text-sm text-gray-400 dark:text-slate-500 mt-0.5'>
-            {total} {l.showing}
-          </p>
+          <p className='text-sm text-gray-400 dark:text-slate-500 mt-0.5'>{total} {l.showing}</p>
         </div>
         <div className='flex gap-2'>
           <button
@@ -119,7 +138,7 @@ export default function Logs() {
           </button>
           <button
             onClick={handleClear}
-            disabled={clearMutation.isPending || logs.length === 0}
+            disabled={clearMutation.isPending || total === 0}
             className='flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all disabled:opacity-40'
           >
             <Trash2 size={14} />
@@ -128,26 +147,50 @@ export default function Logs() {
         </div>
       </div>
 
-      {/* Level tabs */}
-      <div className='flex gap-1 mb-4 flex-wrap'>
-        {LEVEL_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => handleLevelChange(key)}
-            className={[
-              'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border',
-              level === key
-                ? key === 'error' ? 'bg-red-600 text-white border-transparent'
-                  : key === 'warn' ? 'bg-amber-500 text-white border-transparent'
-                  : key === 'info' ? 'bg-sky-600 text-white border-transparent'
-                  : 'text-white border-transparent'
-                : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700',
-            ].join(' ')}
-            style={level === key && key === 'all' ? { background: 'hsl(205,45%,25%)' } : {}}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Filters row */}
+      <div className='flex flex-wrap gap-2 mb-4'>
+        {/* Level tabs */}
+        <div className='flex gap-1'>
+          {LEVEL_TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => handleLevelChange(key)}
+              className={[
+                'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border',
+                level === key
+                  ? key === 'error' ? 'bg-red-600 text-white border-transparent'
+                    : key === 'warn'  ? 'bg-amber-500 text-white border-transparent'
+                    : key === 'info'  ? 'bg-sky-600 text-white border-transparent'
+                    : 'text-white border-transparent'
+                  : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700',
+              ].join(' ')}
+              style={level === key && key === 'all' ? { background: 'hsl(205,45%,25%)' } : {}}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className='relative flex-1 min-w-[180px] max-w-xs'>
+          <Search size={13} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 pointer-events-none' />
+          <input
+            ref={searchRef}
+            type='text'
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={l.searchPlaceholder}
+            className='w-full pl-8 pr-7 py-1.5 rounded-lg text-xs border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 outline-none focus:border-[hsl(205,45%,25%)] transition-colors'
+          />
+          {searchInput && (
+            <button
+              onClick={() => { setSearchInput(''); searchRef.current?.focus(); }}
+              className='absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors'
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -161,7 +204,7 @@ export default function Logs() {
           </div>
         ) : (
           <div className='overflow-x-auto'>
-            <table className='w-full min-w-[560px]'>
+            <table className='w-full min-w-[620px]'>
               <thead>
                 <tr className='border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50'>
                   {[l.cols.level, l.cols.message, l.cols.meta, l.cols.time].map((h, i) => (
@@ -174,14 +217,14 @@ export default function Logs() {
               <tbody className='divide-y divide-gray-50 dark:divide-slate-700/60'>
                 {logs.map((log) => (
                   <tr key={log.id} className='hover:bg-gray-50/60 dark:hover:bg-slate-700/30 transition-colors'>
-                    <td className='px-5 py-3'>
+                    <td className='px-5 py-3 whitespace-nowrap'>
                       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold ${LEVEL_STYLES[log.level] ?? 'bg-gray-100 text-gray-600'}`}>
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${LEVEL_DOT[log.level] ?? 'bg-gray-400'}`} />
                         {log.level}
                       </span>
                     </td>
-                    <td className='px-5 py-3 text-sm text-gray-700 dark:text-slate-200 max-w-xs'>
-                      <span className='break-words'>{log.message}</span>
+                    <td className='px-5 py-3 text-sm text-gray-700 dark:text-slate-200 max-w-sm'>
+                      <span className='break-all'>{log.message}</span>
                     </td>
                     <td className='px-5 py-3'>
                       <MetaCell raw={log.meta} />

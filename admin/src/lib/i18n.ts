@@ -282,11 +282,13 @@ const uz = {
 		cols: { level: 'Daraja', message: 'Xabar', meta: 'Meta', time: 'Vaqt' },
 		noLogs: "Hozircha log yo'q",
 		clearAll: 'Hammasini tozalash',
-		confirmClear: 'Barcha loglarni o\'chirishni xohlaysizmi?',
+		confirmClear: "Barcha loglarni o'chirishni xohlaysizmi?",
 		cleared: 'Loglar tozalandi',
 		refresh: 'Yangilash',
-		showing: 'ta yozuv ko\'rsatilmoqda',
-		loadMore: 'Ko\'proq yuklash',
+		showing: 'ta yozuv',
+		loadMore: "Ko'proq yuklash",
+		search: 'Qidirish',
+		searchPlaceholder: 'Xabar bo\'yicha qidirish...',
 	},
 };
 
@@ -570,8 +572,10 @@ const ru: typeof uz = {
 		confirmClear: 'Удалить все логи?',
 		cleared: 'Логи очищены',
 		refresh: 'Обновить',
-		showing: 'записей показано',
+		showing: 'записей',
 		loadMore: 'Загрузить ещё',
+		search: 'Поиск',
+		searchPlaceholder: 'Поиск по сообщению...',
 	},
 };
 
@@ -855,8 +859,10 @@ const en: typeof uz = {
 		confirmClear: 'Delete all logs?',
 		cleared: 'Logs cleared',
 		refresh: 'Refresh',
-		showing: 'records shown',
+		showing: 'records',
 		loadMore: 'Load more',
+		search: 'Search',
+		searchPlaceholder: 'Search by message...',
 	},
 };
 
