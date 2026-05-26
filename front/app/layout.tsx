@@ -4,6 +4,83 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'Organization',
+			'@id': 'https://ecm-calibration.uz/#organization',
+			name: 'ECM CALIBRATION',
+			legalName: 'ECM CALIBRATION MChJ',
+			url: 'https://ecm-calibration.uz',
+			logo: {
+				'@type': 'ImageObject',
+				url: 'https://ecm-calibration.uz/logo.png',
+				width: 512,
+				height: 512,
+			},
+			contactPoint: {
+				'@type': 'ContactPoint',
+				telephone: '+998503038808',
+				email: 'ecm.calibration.llc@gmail.com',
+				contactType: 'customer service',
+				availableLanguage: ['Uzbek', 'Russian', 'English'],
+			},
+			address: {
+				'@type': 'PostalAddress',
+				streetAddress: "Dustlik ko'chasi, 8-uy, Bog'zor MFY",
+				addressLocality: 'Zangiota tumani',
+				addressRegion: 'Toshkent viloyati',
+				addressCountry: 'UZ',
+			},
+			sameAs: [
+				'https://t.me/ecmcalibration',
+				'https://instagram.com/ecmcalibration',
+			],
+		},
+		{
+			'@type': 'LocalBusiness',
+			'@id': 'https://ecm-calibration.uz/#localbusiness',
+			name: 'ECM CALIBRATION',
+			image: 'https://ecm-calibration.uz/hero-bg.jpg',
+			url: 'https://ecm-calibration.uz',
+			telephone: '+998503038808',
+			email: 'ecm.calibration.llc@gmail.com',
+			description:
+				"ISO/IEC 17025:2017 xalqaro standartiga muvofiq o'lchov asboblarini kalibrlash xizmatlari. Toshkentda ishonchli metrologiya laboratoriyasi.",
+			address: {
+				'@type': 'PostalAddress',
+				streetAddress: "Dustlik ko'chasi, 8-uy, Bog'zor MFY",
+				addressLocality: 'Zangiota tumani',
+				addressRegion: 'Toshkent viloyati',
+				addressCountry: 'UZ',
+			},
+			geo: {
+				'@type': 'GeoCoordinates',
+				latitude: 41.11675,
+				longitude: 69.07091,
+			},
+			openingHoursSpecification: {
+				'@type': 'OpeningHoursSpecification',
+				dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+				opens: '09:00',
+				closes: '18:00',
+			},
+			priceRange: '$$',
+			currenciesAccepted: 'UZS',
+			paymentAccepted: 'Cash, Bank Transfer',
+		},
+		{
+			'@type': 'WebSite',
+			'@id': 'https://ecm-calibration.uz/#website',
+			url: 'https://ecm-calibration.uz',
+			name: 'ECM CALIBRATION',
+			inLanguage: ['uz', 'ru', 'en'],
+			publisher: { '@id': 'https://ecm-calibration.uz/#organization' },
+		},
+	],
+};
+
 const siteUrl = 'https://ecm-calibration.uz';
 
 export const metadata: Metadata = {
@@ -93,6 +170,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					<main className='flex-1'>{children}</main>
 					<Footer />
 				</LanguageProvider>
+				<script
+					type='application/ld+json'
+					dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+				/>
 			</body>
 		</html>
 	);

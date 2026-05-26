@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description: "ISO/IEC 17025:2017 standartiga muvofiq akkreditatsiya doirasi.",
     images: ['/hero-bg.jpg'],
   },
-  alternates: { canonical: 'https://ecmcalibration.uz/accreditation' },
+  alternates: { canonical: 'https://ecm-calibration.uz/accreditation' },
 };
 
 export default function AccreditationLayout({ children }: { children: React.ReactNode }) {

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     description: "Metrologiya va kalibrlash bo'yicha professional kurslar.",
     images: ['/hero-bg.jpg'],
   },
-  alternates: { canonical: 'https://ecmcalibration.uz/education' },
+  alternates: { canonical: 'https://ecm-calibration.uz/education' },
 };
 
 export default function EducationLayout({ children }: { children: React.ReactNode }) {
